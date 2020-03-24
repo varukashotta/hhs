@@ -7,7 +7,7 @@ class YoutubeAPI extends RESTDataSource {
   constructor() {
     super();
     this.baseURL =
-      `https://www.googleapis.com/youtube/v3/search?part=snippet&key=${process.env.YOUTUBE_API}&q=covid`;
+      `https://www.googleapis.com/youtube/v3/search?part=snippet&key=${process.env.YOUTUBE_API}&q=covid-19`;
   }
 
   videosReducer(video: any) {
