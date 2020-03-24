@@ -7,7 +7,7 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "start": "npm run build && node 'dist/server.js'",
+    "start": "node 'dist/server.js'",
     "build": "npx tsc -p .",
     "start:dev": "npm run build:dev",
     "build:dev": "nodemon 'src/server.ts' --exec 'ts-node' src/server.ts -e ts,graphql"
