@@ -60,6 +60,9 @@ const server = new ApolloServer({
   typeDefs,
   resolvers,
   tracing: true,
+  introspection: true,
+  debug: true,
+  playground: true,
   dataSources: () => ({
     youtubeAPI: new YoutubeAPI()
   })
