@@ -17,10 +17,10 @@ const typeDefs = gql`
 
   type Video {
     id: ID!
-    title: String
-    publishedAt: String
-    description: String
-    thumbnails: Boolean!
+    title: String!
+    publishedAt: String!
+    description: String!
+    thumbnail: String!
   }
 
   # The "Query" type is special: it lists all of the available queries that

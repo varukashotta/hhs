@@ -11,16 +11,16 @@ class YoutubeAPI extends RESTDataSource {
   }
 
   videosReducer(video: any) {
-    console.log(video);
+    console.log(video.snippet.thumbnails.high.url);
 
-    const { publishedAt, title, description, thumbnail, thumbnails, channelTitle } = video.snippet;
+    const { publishedAt, title, description, thumbnails, channelTitle } = video.snippet;
 
     return {
       id: video.id.videoId || 0,
       publishedAt,
       title,
       description,
-      thumbnails: thumbnails.high,
+      thumbnail: thumbnails.high.url,
       channelTitle
     };
   }
