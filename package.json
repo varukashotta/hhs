@@ -9,7 +9,7 @@
   "scripts": {
     "start": "node 'dist/server.js'",
     "build": "npx tsc -p .",
-    "start:dev": "npm run build:dev",
+    "dev": "npm run build:dev",
     "build:dev": "nodemon 'src/server.ts' --exec 'ts-node' src/server.ts -e ts,graphql"
   },
   "devDependencies": {
@@ -19,9 +19,12 @@
     "typescript": "^3.8.3"
   },
   "dependencies": {
+    "@elastic/elasticsearch": "^7.6.1",
+    "@types/uuid": "^7.0.2",
     "apollo-datasource-rest": "^0.8.0",
     "apollo-server": "^2.11.0",
     "dotenv": "^8.2.0",
-    "graphql": "^14.6.0"
+    "graphql": "^14.6.0",
+    "uuid": "^7.0.2"
   }
 }

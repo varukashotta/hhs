@@ -1,19 +1,18 @@
 import { ApolloServer, gql } from "apollo-server";
 import YoutubeAPI from "./datasources/youtube";
 import dotenv from "dotenv";
+import RedditAPI from "./datasources/reddit";
+import NewsAPI from "./datasources/news";
+import TwitterAPI from "./datasources/twitter";
+import { search } from './search/elasticsearch';
 
 dotenv.config();
-// A schema is a collection of type definitions (hence "typeDefs")
-// that together define the "shape" of queries that are executed against
-// your data.
-const typeDefs = gql`
-  # Comments in GraphQL strings (such as this one) start with the hash (#) symbol.
 
-  # This "Book" type defines the queryable fields for every book in our data source.
-  type Book {
-    title: String
-    author: String
-  }
+search();
+
+const typeDefs = gql`
+
+  scalar Date
 
   type Video {
     id: ID!
@@ -23,34 +22,41 @@ const typeDefs = gql`
     thumbnail: String!
   }
 
+  type Info {
+    id: ID!
+    title: String!
+    publishedAt: Date!
+    link: String
+    author: String
+  }
+
   # The "Query" type is special: it lists all of the available queries that
   # clients can execute, along with the return type for each. In this
   # case, the "books" query returns an array of zero or more Books (defined above).
   type Query {
-    books: [Book],
     youtube: [Video]
+    reddit: [Info]
+    news: [Info]
+    twitter: [Info]
   }
 `;
-
-const books = [
-  {
-    title: "Harry Potter and the Chamber of Secrets",
-    author: "J.K. Rowling"
-  },
-  {
-    title: "Jurassic Park",
-    author: "Michael Crichton"
-  }
-];
 
 // Resolvers define the technique for fetching the types defined in the
 // schema. This resolver retrieves books from the "books" array above.
 const resolvers = {
   Query: {
-    books: () => books,
     youtube: async (_source: any, { id }: any, { dataSources }: any) => {
-        return dataSources.youtubeAPI.getAllLaunches();
+      return dataSources.youtubeAPI.getAllLaunches();
     },
+    reddit: async (_source: any, { id }: any, { dataSources }: any) => {
+      return dataSources.redditAPI.getAllPosts();
+    },
+    news: async (_source: any, { id }: any, { dataSources }: any) => {
+      return dataSources.newsAPI.getAllPosts();
+    },
+    twitter: async (_source: any, { id }: any, { dataSources }: any) => {
+      return dataSources.twitterAPI.getAllPosts();
+    }
   }
 };
 
@@ -62,9 +68,12 @@ const server = new ApolloServer({
   tracing: true,
   introspection: true,
   debug: true,
-  playground: true,
+  playground: true, 
   dataSources: () => ({
-    youtubeAPI: new YoutubeAPI()
+    youtubeAPI: new YoutubeAPI(),
+    redditAPI: new RedditAPI(),
+    newsAPI: new NewsAPI(),
+    twitterAPI: new TwitterAPI()
   })
 });
 
