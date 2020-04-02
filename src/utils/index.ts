@@ -1,3 +1,16 @@
+import fs from "fs";
+import path from "path";
+
+export const readLocalFile = async (file: string) => {
+  const filePath = path.join(__dirname, file);
+
+  try {
+    return await fs.readFileSync(filePath);
+  } catch (error) {
+    return error;
+  }
+};
+
 export const csvToJson = (csv: string) => {
   const lines = csv.split("\n");
 
@@ -19,7 +32,10 @@ export const csvToJson = (csv: string) => {
   return result;
 };
 
-export const getUniqueColumnValuesFromCsv = (csv:string, columnNumber: number) => {
+export const getUniqueColumnValuesFromCsv = (
+  csv: string,
+  columnNumber: number
+) => {
   const lines = csv.split("\n");
 
   const countries: string[] = [];
@@ -30,8 +46,8 @@ export const getUniqueColumnValuesFromCsv = (csv:string, columnNumber: number) =
 
   const countriesRegion: string[] = Array.from(new Set(countries));
 
-  const filtered = countriesRegion.filter((el) => {
-    if(el !== null || el !== "") return el;
+  const filtered = countriesRegion.filter(el => {
+    if (el !== null || el !== "") return el;
   });
 
   filtered.shift();

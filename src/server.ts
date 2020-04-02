@@ -9,7 +9,7 @@ import { getCSV, addColumnValuesToDB } from './csvProcessor/index';
 
 dotenv.config();
 
-addColumnValuesToDB()
+getCSV();
 
 // search();
 
