@@ -5,10 +5,13 @@ import RedditAPI from "./datasources/reddit";
 import NewsAPI from "./datasources/news";
 import TwitterAPI from "./datasources/twitter";
 import { search } from './search/elasticsearch';
+import { getCSV, addColumnValuesToDB } from './csvProcessor/index';
 
 dotenv.config();
 
-search();
+addColumnValuesToDB()
+
+// search();
 
 const typeDefs = gql`
 
