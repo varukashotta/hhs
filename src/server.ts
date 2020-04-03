@@ -5,7 +5,7 @@ import RedditAPI from "./datasources/reddit";
 import NewsAPI from "./datasources/news";
 import TwitterAPI from "./datasources/twitter";
 import { search } from './search/elasticsearch';
-import { getCSV, addColumnValuesToDB } from './csvProcessor/index';
+import { getCSV} from './csvProcessor/index';
 
 dotenv.config();
 
@@ -16,6 +16,7 @@ getCSV();
 const typeDefs = gql`
 
   scalar Date
+
 
   type Video {
     id: ID!
