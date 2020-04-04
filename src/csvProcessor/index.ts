@@ -1,10 +1,5 @@
 import axios from "axios";
-import {
-  csvToJson,
-  getUniqueColumnValuesFromCsv,
-  readLocalFile,
-  CSVToArray
-} from "../utils/index";
+import { csvToJson, readLocalFile } from "../utils/index";
 import graphqlClient from "../utils/GraphQLRequest";
 import moment from "moment";
 
@@ -105,69 +100,74 @@ const saveRow = `mutation($admin: String!, $active: Int!, $combinedKey: String!,
 // };
 
 const addRowsToDB = (rows: any) => {
-  return new Promise((resolve, reject) => {
-    rows.map(async (row: any) => {
-      if (row) { 
-        try {
-          const {
-            Province_State,
-            Lat,
-            Long_,
-            Country_Region,
-            Admin2,
-            Deaths,
-            Confirmed,
-            Active,
-            Combined_Key,
-            Last_Update,
-            FIPS,
-            Recovered
-          } = row;
+  (async () => {
+    return new Promise((resolve, reject) => {
+      rows.map(async (row: any) => {
+        if (row.countryRegion) {
+          console.log(row);
+          try {
+            const {
+              Province_State,
+              Lat,
+              Long_,
+              Country_Region,
+              Admin2,
+              Deaths,
+              Confirmed,
+              Active,
+              Combined_Key,
+              Last_Update,
+              FIPS,
+              Recovered
+            } = row;
 
-          await addCountryToDB({
-            countryRegion: Country_Region,
+            const input = {
+              countryRegion: Country_Region,
 
-            admin: Admin2,
+              admin: Admin2 || "",
 
-            provinceState: Province_State,
+              provinceState: Province_State || "",
 
-            coordinates: `${Lat || 0}, ${Long_ || 0}`,
-            // tslint:disable-next-line: radix
-            deaths: parseInt(Deaths) || 0,
-            // tslint:disable-next-line: radix
-            recovered: parseInt(Recovered) ? parseInt(Recovered) : 0,
-            // tslint:disable-next-line: radix
-            active: parseInt(Active) || 0,
-            // tslint:disable-next-line: radix
-            confirmed: parseInt(Confirmed) ? parseInt(Confirmed) : 0,
+              coordinates: `${Lat || 0}, ${Long_ || 0}`,
+              // tslint:disable-next-line: radix
+              deaths: parseInt(Deaths) || 0,
+              // tslint:disable-next-line: radix
+              recovered: parseInt(Recovered) ? parseInt(Recovered) : 0,
+              // tslint:disable-next-line: radix
+              active: parseInt(Active) || 0,
+              // tslint:disable-next-line: radix
+              confirmed: parseInt(Confirmed) ? parseInt(Confirmed) : 0,
 
-            combinedKey: Combined_Key ? Combined_Key.replace(/^,/, '') : "",
+              combinedKey: Combined_Key || "",
 
-            lastUpdated: moment(new Date(Last_Update)).format(),
+              lastUpdated: moment(new Date(Last_Update)).format(),
 
-            // tslint:disable-next-line: radix
-            fips: parseInt(FIPS) ? parseInt(FIPS) : 0
-          });
+              // tslint:disable-next-line: radix
+              fips: parseInt(FIPS) ? parseInt(FIPS) : 0
+            };
 
-          await sleep(10000);
+            await addCountryToDB(input);
 
-          resolve(true);
-        } catch (e) {
-          console.log(e);
-          await sleep(10000);
+            await sleep(10000);
 
-          reject(e);
+            resolve(true);
+          } catch (e) {
+
+            console.log(e);
+            
+            await sleep(10000);
+
+            reject(e);
+          }
         }
-      }
+      });
     });
-  });
+  })();
 };
 
 export const getCSV = async () => {
   try {
-    const result: string | void = await readLocalFile(
-      "../data/04-02-2020.csv"
-    );
+    const result: string | void = await readLocalFile("../data/04-02-2020.csv");
 
     const convertedResult = await csvToJson(String(result));
 
@@ -176,27 +176,6 @@ export const getCSV = async () => {
     // handle error
     console.log(error);
   }
-
-  //   axios
-  //     .get(
-  //       "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/03-31-2020.csv"
-  //     )
-  //     .then(async response => {
-  //       // handle success
-  //       try {
-  //         const convertedResult = await csvToJson(response.data);
-
-  //         console.log("here");
-
-  //         addRowsToDB(convertedResult);
-  //       } catch (error) {
-  //         console.log(error.response.data);
-  //       }
-  //     })
-  //     .catch(error => {
-  //       // handle error
-  //       console.log(error);
-  //     });
 };
 
 export const addCountryToDB = async (params: any) => {
@@ -207,7 +186,6 @@ export const addCountryToDB = async (params: any) => {
   }
 };
 
-// const iterateColumnsToDB = (columnValues: string[]) => {
 //   (async () => {
 //     for (const columnValue of columnValues) {
 
@@ -217,27 +195,3 @@ export const addCountryToDB = async (params: any) => {
 //       // do something with s and with fruitToLoad here
 //     }
 //   })();
-// };
-
-// export const addColumnValuesToDB = () => {
-//   axios
-//     .get(
-//       "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/03-31-2020.csv"
-//     )
-//     .then(async response => {
-//       // handle success
-//       try {
-//         const convertedResult = getUniqueColumnValuesFromCsv(response.data, 3);
-
-//         await iterateColumnsToDB(convertedResult);
-
-//         // addCountryToDB("namehy");
-//       } catch (error) {
-//         console.log(error);
-//       }
-//     })
-//     .catch(error => {
-//       // handle error
-//       console.log(error);
-//     });
-// };

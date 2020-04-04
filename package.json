@@ -24,6 +24,7 @@
     "apollo-datasource-rest": "^0.8.0",
     "apollo-server": "^2.11.0",
     "axios": "^0.19.2",
+    "csv-parse": "^4.8.8",
     "csv-parser": "^2.3.2",
     "dotenv": "^8.2.0",
     "graphql": "^14.6.0",
