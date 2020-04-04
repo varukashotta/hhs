@@ -1,47 +1,20 @@
-import  { Client } from '@elastic/elasticsearch';
-const client = new Client({ node: 'http://search.alvail.com:9200' });
+import { Client } from "@elastic/elasticsearch";
+import processSearch from "../queue/processes/search";
+const client = new Client({ node: "http://search.alvail.com:9200" });
 
-export const search = async() => {
+export const search = async (params: any) => {
+  await processSearch(params, undefined, async info => {
+    console.log(info);
 
-// await client.index({
-//     index: 'game-of-thrones',
-//     body: {
-//       character: 'Ned Stark',
-//       quote: 'Winter is coming.'
-//     }
-//   });
+    const result = await client.index({
+      index: "human-hope",
+      refresh: "true",
+      body: info.phrase
+    });
 
-//     await client.index({
-//     index: 'game-of-thrones',
-//     body: {
-//       character: 'Daenerys Targaryen',
-//       quote: 'I am the mother of dragons.'
-//     }
-//   });
-
-//   await client.index({
-//     index: 'game-of-thrones',
-//     refresh: "true",
-//     body: {
-//       character: 'Tyrion Lannister',
-//       quote: 'A mind needs books like a sword needs a whetstone.'
-//     }
-//   })
-
-  const { body } = await client.search({
-    index: 'game-of-thrones',
-    body: {
-      query: {
-        match: {
-          quote: 'books'
-        }
-      }
-    }
+    console.log(result);
   });
-  
-  // tslint:disable-next-line: no-console
-  console.log(body.hits.hits)
-}
+};
 
 // async function run () {
 //   // Let's start by indexing some data

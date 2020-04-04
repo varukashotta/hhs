@@ -4,14 +4,12 @@ import dotenv from "dotenv";
 import RedditAPI from "./datasources/reddit";
 import NewsAPI from "./datasources/news";
 import TwitterAPI from "./datasources/twitter";
-import { search } from './search/elasticsearch';
 import { getCSV} from './csvProcessor/index';
 
 dotenv.config();
 
 getCSV();
 
-// search();
 
 const typeDefs = gql`
 

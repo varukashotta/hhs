@@ -20,16 +20,23 @@
   },
   "dependencies": {
     "@elastic/elasticsearch": "^7.6.1",
+    "@types/bull": "^3.12.1",
+    "@types/redis": "^2.8.17",
     "@types/uuid": "^7.0.2",
+    "@types/winston-loggly-bulk": "^3.0.0",
     "apollo-datasource-rest": "^0.8.0",
     "apollo-server": "^2.11.0",
     "axios": "^0.19.2",
+    "bull": "^3.13.0",
     "csv-parse": "^4.8.8",
     "csv-parser": "^2.3.2",
     "dotenv": "^8.2.0",
     "graphql": "^14.6.0",
     "graphql-request": "^1.8.2",
     "moment": "^2.24.0",
-    "uuid": "^7.0.2"
+    "redis": "^3.0.2",
+    "uuid": "^7.0.2",
+    "winston": "^3.2.1",
+    "winston-loggly-bulk": "^3.0.1"
   }
 }
