@@ -1,12 +1,24 @@
 import { csvToJson, readLocalFile } from "../utils/index";
 import graphqlClient from "../utils/GraphQLRequest";
 import moment from "moment";
+import { search } from "../search/elasticsearch";
 
 const saveRow = `mutation($admin: String!, $active: Int!, $combinedKey: String!, $confirmed: Int!, $coordinates: point!, $countryRegion: String!, $lastUpdated: date!, $deaths: Int!, $fips: Int!, $provinceState: String!, $recovered: Int!){
     insert_recorded(objects: {admin: $admin, active: $active, combined_key: $combinedKey, confirmed: $confirmed, coordinates: $coordinates,
         country_region: $countryRegion, last_updated: $lastUpdated, deaths: $deaths, fips: $fips, province_state: $provinceState, recovered: $recovered}, on_conflict: {constraint: recorded_pkey, update_columns: [deaths, active, recovered, confirmed]}) {
       returning {
+        active
+        admin
+        combined_key
+        confirmed
+        coordinates
         country_region
+        deaths
+        last_updated
+        id
+        updated_at
+        province_state
+        created_at
       }
     }
   }
@@ -24,7 +36,7 @@ export const getCSV = async () => {
 
     const convertedResult = await csvToJson(String(result));
 
-    addRowsToDB(convertedResult);
+    await addRowsToDB(convertedResult);
   } catch (error) {
     // handle error
     return error;
@@ -43,7 +55,6 @@ export const addCountryToDB = async (params: any) => {
 async function runShow(rows: any) {
   for (const row of rows) {
     if (row.Country_Region) {
-      console.log(row);
       try {
         const {
           Province_State,
@@ -57,7 +68,7 @@ async function runShow(rows: any) {
           Combined_Key,
           Last_Update,
           FIPS,
-          Recovered
+          Recovered,
         } = row;
         const input = {
           countryRegion: Country_Region,
@@ -75,10 +86,19 @@ async function runShow(rows: any) {
           combinedKey: Combined_Key || "",
           lastUpdated: moment(new Date(Last_Update)).format(),
           // tslint:disable-next-line: radix
-          fips: parseInt(FIPS) ? parseInt(FIPS) : 0
+          fips: parseInt(FIPS) ? parseInt(FIPS) : 0,
         };
         const result: any = await addCountryToDB(input);
-        console.log(result);
+
+        if (result && result.insert_recorded.returning.length > 0) {
+          try{
+            let results = await search({ phrase: result.insert_recorded.returning[0]});
+             console.log(result.insert_recorded.returning[0],results);
+          } catch(e){
+            console.log(e);
+          }
+
+        }
       } catch (e) {
         console.log(e);
       }

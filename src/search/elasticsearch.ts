@@ -3,16 +3,25 @@ import processSearch from "../queue/processes/search";
 const client = new Client({ node: "http://search.alvail.com:9200" });
 
 export const search = async (params: any) => {
-  await processSearch(params, undefined, async info => {
-    console.log(info);
+   processSearch(params, undefined, async info => {
 
-    const result = await client.index({
-      index: "human-hope",
-      refresh: "true",
-      body: info.phrase
-    });
 
-    console.log(result);
+    try{
+      const result = await client.index({
+        index: "human-hope-today",
+        refresh: "true",
+        body: info.phrase
+      });
+
+      console.log(result);
+
+    } catch(e){
+      console.log(e)
+
+      return e;
+    }
+
+
   });
 };
 

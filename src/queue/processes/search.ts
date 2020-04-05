@@ -4,7 +4,6 @@
 import createQueue from '../index';
 import { logger } from '../../log/index';
 
-const searchQueue = createQueue('search');
 
 
 // const data = {
@@ -18,19 +17,24 @@ const searchQueue = createQueue('search');
 
 
 const processSearch = async (data:any, options = {}, callback: ((arg0: any) => any)) => {
+  const searchQueue = createQueue('search');
+
   try {
     await searchQueue.add(data, options);
   } catch (e) {
-    logger.error(e);
+    console.log(e);
   }
 
   try {
-    await searchQueue.process(async (job) => {
+    await searchQueue.process(async (job, done) => {
       await callback(job.data);
+      done();
     });
   } catch (e) {
-    logger.error(e);
+    console.log(e);
   }
+
+  searchQueue.close();
 };
 
 export default processSearch;
