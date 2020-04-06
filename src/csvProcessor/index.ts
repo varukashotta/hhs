@@ -88,17 +88,33 @@ async function runShow(rows: any) {
           // tslint:disable-next-line: radix
           fips: parseInt(FIPS) ? parseInt(FIPS) : 0,
         };
-        const result: any = await addCountryToDB(input);
+        const result = await addCountryToDB(input);
 
-        if (result && result.insert_recorded.returning.length > 0) {
-          try{
-            let results = await search({ phrase: result.insert_recorded.returning[0]});
-             console.log(result.insert_recorded.returning[0],results);
-          } catch(e){
-            console.log(e);
+        if(result){
+         await new Promise(async (resolve, reject) => {
+
+
+          if (result && result.insert_recorded.returning.length > 0) {
+  
+           let s = await search({
+              phrase: result.insert_recorded.returning[0],
+            });
+
+            // console.log({se});
+            
+            console.log({s});
+
+            resolve(true);
+
+          
+          } else {
+            console.log('sey');
+
+            resolve('se');
           }
 
-        }
+        });
+      }
       } catch (e) {
         console.log(e);
       }

@@ -3,7 +3,7 @@ import processSearch from "../queue/processes/search";
 const client = new Client({ node: "http://search.alvail.com:9200" });
 
 export const search = async (params: any) => {
-   processSearch(params, undefined, async info => {
+processSearch(params, undefined, async (info, job) => {
 
 
     try{
@@ -13,7 +13,11 @@ export const search = async (params: any) => {
         body: info.phrase
       });
 
+      // console.log(job);
+
       console.log(result);
+
+      // return result;
 
     } catch(e){
       console.log(e)

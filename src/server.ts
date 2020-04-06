@@ -6,9 +6,11 @@ import NewsAPI from "./datasources/news";
 import TwitterAPI from "./datasources/twitter";
 import { getCSV} from './csvProcessor/index';
 
+const EventEmitter = require( "events" );  
+EventEmitter.defaultMaxListeners = 100;
 dotenv.config();
 
-getCSV();
+// getCSV();
 
 
 const typeDefs = gql`

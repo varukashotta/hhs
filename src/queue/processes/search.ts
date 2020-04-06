@@ -3,6 +3,7 @@
 
 import createQueue from '../index';
 import { logger } from '../../log/index';
+import _ from 'lodash';
 
 
 
@@ -16,8 +17,16 @@ import { logger } from '../../log/index';
 // };
 
 
-const processSearch = async (data:any, options = {}, callback: ((arg0: any) => any)) => {
+
+
+const processSearch = async (data:any, options = {}, callback: ((arg0: any, arg1: any) => any)) => {
   const searchQueue = createQueue('search');
+
+  var after100 = _.after(100, function() {
+    searchQueue.close().then(function() {
+      console.log('done');
+    });
+  });
 
   try {
     await searchQueue.add(data, options);
@@ -27,14 +36,34 @@ const processSearch = async (data:any, options = {}, callback: ((arg0: any) => a
 
   try {
     await searchQueue.process(async (job, done) => {
-      await callback(job.data);
-      done();
+     let you =  await callback(job.data, job);
+
+
+
+      searchQueue.close();
+
+      // return you;
+
+
+      // let test = await job.isCompleted();
+
+      // console.log(test);
+      // searchQueue.on('completed', after100);
+      // searchQueue.clean(15000);
+
+      // searchQueue.on('progress', after100)
+
+      done(null, "test");
+
+
     });
   } catch (e) {
-    console.log(e);
+    return e;
   }
 
-  searchQueue.close();
+
+
+  searchQueue.on('completed',  () => console.log('done'));
 };
 
 export default processSearch;
