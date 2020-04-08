@@ -1,28 +1,27 @@
-import { RESTDataSource }from "apollo-datasource-rest";
+import { RESTDataSource } from "apollo-datasource-rest";
 import dotenv from "dotenv";
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from "uuid";
+import moment from "moment";
 
 dotenv.config();
+
+const date = moment(Date.now()).format("YYYY-MM-DD");
 
 class NewsAPI extends RESTDataSource {
   constructor() {
     super();
-    this.baseURL =
-      `http://newsapi.org/v2/everything?q=covid-19&from=2020-03-29&apiKey=778cb20e2c264898b94672d849531a87&sortBy=popularity`;
+    this.baseURL = `https://newsapi.org/v2/top-headlines?q=corona virus&from=${date}&apiKey=${process.env.NEWS_API}&sortBy=popular&pageSize=50`;
   }
 
   postsReducer(post: any) {
-
-    const {author, title, url, publishedAt} = post;
-
-    console.log(author, title, url, publishedAt);
+    const { author, title, url, publishedAt } = post;
 
     return {
       id: uuidv4(),
       publishedAt,
       title,
       link: url,
-      author
+      author,
     };
   }
 
@@ -30,8 +29,6 @@ class NewsAPI extends RESTDataSource {
     const response = await this.get("/");
 
     const responsePosts = response.articles;
-
-    console.log(response);
 
     return Array.isArray(responsePosts)
       ? responsePosts.map((posts: any) => this.postsReducer(posts))

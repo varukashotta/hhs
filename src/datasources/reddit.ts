@@ -7,20 +7,21 @@ class RedditAPI extends RESTDataSource {
   constructor() {
     super();
     this.baseURL =
-      `https://www.reddit.com/r/Coronavirus/top.json?limit=2`;
+      `https://www.reddit.com/r/Coronavirus/top.json?limit=25`;
   }
 
   postsReducer(post: any) {
 
-    const {id, title, permalink, created_utc} = post.data;
+    const {id, title, permalink, created_utc, author_fullname, thumbnail} = post.data;
 
-    console.log(id, title, permalink, created_utc);
 
     return {
       id,
       publishedAt: created_utc,
       title,
       link: permalink,
+      author: author_fullname,
+      thumbnail
     };
   }
 
@@ -29,7 +30,6 @@ class RedditAPI extends RESTDataSource {
 
     const responsePosts = response.data.children;
 
-    console.log(responsePosts);
 
     return Array.isArray(responsePosts)
       ? responsePosts.map((posts: any) => this.postsReducer(posts))
