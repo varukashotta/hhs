@@ -1,6 +1,7 @@
 import { RESTDataSource } from "apollo-datasource-rest";
 import dotenv from "dotenv";
 import { saveData, getData } from "../redis/cache";
+import { logger } from "../log";
 
 dotenv.config();
 
@@ -10,7 +11,7 @@ class YoutubeAPI extends RESTDataSource {
     this.baseURL = `https://www.googleapis.com/youtube/v3/search?part=snippet&key=${process.env.YOUTUBE_API}&maxResults=25&q=covid-19`;
   }
 
-  videosReducer(video: any) {
+  dataReducer(video: any) {
     const {
       publishedAt,
       title,
@@ -29,32 +30,35 @@ class YoutubeAPI extends RESTDataSource {
     };
   }
 
-  async getAllLaunches() {
+  async getItems() {
     try {
-      const data:string = await getData("youtube");
-      return JSON.parse(data);
+      const data: string = await getData("youtube");
+      if (data) JSON.parse(data);
+      if (!data) await getFromSource(this);
     } catch (e) {
-      throw new Error("No videos found");
+      throw new Error("Error fetching data, please try reloading the page.");
     }
-
-    // const response = await this.get("/");
-
-    // if (Array.isArray(response.items)) {
-    //   await saveData(
-    //     "youtube",
-    //     JSON.stringify(
-    //       response.items.map((videos: any) => this.videosReducer(videos))
-    //     ),
-    //     3600
-    //   );
-
-    //   return response.items.map((videos: any) => this.videosReducer(videos));
-    // } else {
-    //   return [];
-    // }
-
-    // throw new Error("No videos found");
   }
 }
+
+const getFromSource = async (api: any) => {
+  const response = await api.get("/");
+
+  if (Array.isArray(response.items)) {
+    const data = response.items.map((videos: any) => api.dataReducer(videos));
+
+    try {
+      const result = await saveData("youtube", JSON.stringify(data), 600);
+
+      logger.info({ message: result });
+    } catch (e) {
+      logger.error(e);
+    }
+
+    return data;
+  } else {
+    throw new Error("No videos found");
+  }
+};
 
 export default YoutubeAPI;
