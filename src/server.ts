@@ -4,9 +4,10 @@ import dotenv from "dotenv";
 import RedditAPI from "./datasources/reddit";
 import NewsAPI from "./datasources/news";
 import TwitterAPI from "./datasources/twitter";
-import { getCSV} from './csvProcessor/index';
+import { getCSV } from "./csvProcessor/index";
+import useRedis from "./redis/index";
 
-const EventEmitter = require( "events" );  
+const EventEmitter = require("events");
 EventEmitter.defaultMaxListeners = 100;
 dotenv.config();
 
@@ -14,7 +15,6 @@ dotenv.config();
 
 
 const typeDefs = gql`
-
   scalar Date
 
   type Info {
@@ -53,8 +53,8 @@ const resolvers = {
     },
     twitter: async (_source: any, { id }: any, { dataSources }: any) => {
       return dataSources.twitterAPI.getAllPosts();
-    }
-  }
+    },
+  },
 };
 
 // The ApolloServer constructor requires two parameters: your schema
@@ -65,13 +65,13 @@ const server = new ApolloServer({
   tracing: true,
   introspection: true,
   debug: true,
-  playground: true, 
+  playground: true,
   dataSources: () => ({
     youtubeAPI: new YoutubeAPI(),
     redditAPI: new RedditAPI(),
     newsAPI: new NewsAPI(),
-    twitterAPI: new TwitterAPI()
-  })
+    twitterAPI: new TwitterAPI(),
+  }),
 });
 
 // The `listen` method launches a web server.

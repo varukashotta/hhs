@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 class TwitterAPI extends RESTDataSource {
-  baseURL = `https://api.twitter.com/1.1/search/tweets.json?q=%23covid19&result_type=popular`;
+  baseURL = `https://api.twitter.com/1.1/search/tweets.json?q=%23covid19&result_type=popular&count=50`;
 
   willSendRequest(request: RequestOptions) {
     request.headers.set(

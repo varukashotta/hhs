@@ -7,7 +7,7 @@ class RedditAPI extends RESTDataSource {
   constructor() {
     super();
     this.baseURL =
-      `https://www.reddit.com/r/Coronavirus/top.json?limit=25`;
+      `https://www.reddit.com/r/Coronavirus/top.json?limit=50`;
   }
 
   postsReducer(post: any) {

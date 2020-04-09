@@ -1,15 +1,14 @@
-import redis from 'redis';
-import { logger } from '../log/index';
-import dotenv from 'dotenv';
+import redis from "redis";
+import { logger } from "../log/index";
+import dotenv from "dotenv";
 
 dotenv.config();
 
 const useRedis = async (callback: (arg0: any) => void) => {
-  let client:any;
-  try{
+  let client: any;
+  try {
     client = await redis.createClient(`${process.env.REDIS_URL}`);
-
-  }catch(error){
+  } catch (error) {
     console.log(error);
   }
 
