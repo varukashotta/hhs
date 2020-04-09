@@ -43,16 +43,16 @@ const typeDefs = gql`
 const resolvers = {
   Query: {
     youtube: async (_source: any, { id }: any, { dataSources }: any) => {
-      return dataSources.youtubeAPI.getItems();
+      return dataSources.youtubeAPI.getVideos();
     },
     reddit: async (_source: any, { id }: any, { dataSources }: any) => {
-      return dataSources.redditAPI.getItems();
+      return dataSources.redditAPI.getRedits();
     },
     news: async (_source: any, { id }: any, { dataSources }: any) => {
-      return dataSources.newsAPI.getItems();
+      return dataSources.newsAPI.getNews();
     },
     twitter: async (_source: any, { id }: any, { dataSources }: any) => {
-      return dataSources.twitterAPI.getItems();
+      return dataSources.twitterAPI.getTweets();
     },
   },
 };

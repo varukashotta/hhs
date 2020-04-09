@@ -1,7 +1,6 @@
 import { RESTDataSource } from "apollo-datasource-rest";
 import dotenv from "dotenv";
-import { saveData, getData } from "../redis/cache";
-import { logger } from "../log";
+import { getAPIData } from "./utils";
 
 dotenv.config();
 
@@ -30,35 +29,9 @@ class YoutubeAPI extends RESTDataSource {
     };
   }
 
-  async getItems() {
-    try {
-      const data: string = await getData("youtube");
-      if (data) JSON.parse(data);
-      if (!data) await getFromSource(this);
-    } catch (e) {
-      throw new Error("Error fetching data, please try reloading the page.");
-    }
+  async getVideos() {
+    return await getAPIData(this, "youtube", "items");
   }
 }
-
-const getFromSource = async (api: any) => {
-  const response = await api.get("/");
-
-  if (Array.isArray(response.items)) {
-    const data = response.items.map((videos: any) => api.dataReducer(videos));
-
-    try {
-      const result = await saveData("youtube", JSON.stringify(data), 600);
-
-      logger.info({ message: result });
-    } catch (e) {
-      logger.error(e);
-    }
-
-    return data;
-  } else {
-    throw new Error("No videos found");
-  }
-};
 
 export default YoutubeAPI;
