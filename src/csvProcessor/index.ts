@@ -90,31 +90,24 @@ async function runShow(rows: any) {
         };
         const result = await addCountryToDB(input);
 
-        if(result){
-         await new Promise(async (resolve, reject) => {
+        if (result) {
+          await new Promise(async (resolve, reject) => {
+            if (result && result.insert_recorded.returning.length > 0) {
+              let s = await search({
+                phrase: result.insert_recorded.returning[0],
+              });
 
+              // console.log({se});
 
-          if (result && result.insert_recorded.returning.length > 0) {
-  
-           let s = await search({
-              phrase: result.insert_recorded.returning[0],
-            });
+              console.log({ s });
 
-            // console.log({se});
-            
-            console.log({s});
-
-            resolve(true);
-
-          
-          } else {
-            console.log('sey');
-
-            resolve('se');
-          }
-
-        });
-      }
+              resolve(true);
+            } else {
+              
+              resolve("se");
+            }
+          });
+        }
       } catch (e) {
         console.log(e);
       }

@@ -1,5 +1,6 @@
 import { RESTDataSource, RequestOptions } from "apollo-datasource-rest";
 import dotenv from "dotenv";
+import { getAPIData } from "./utils";
 
 dotenv.config();
 
@@ -13,25 +14,19 @@ class TwitterAPI extends RESTDataSource {
     );
   }
 
-  postsReducer(post: any) {
+  dataReducer(post: any) {
     const { id, user, text, created_at } = post;
 
     return {
       id,
       publishedAt: created_at,
       title: text,
-      author: user.screen_name
+      author: user.screen_name,
     };
   }
 
-  async getAllPosts() {
-    const response = await this.get("/");
-
-    const responsePosts = response.statuses;
-
-    return Array.isArray(responsePosts)
-      ? responsePosts.map((posts: any) => this.postsReducer(posts))
-      : [];
+  async getTweets() {
+    return await getAPIData(this, "twitter", "statuses");
   }
 }
 

@@ -25,7 +25,7 @@ class NewsAPI extends RESTDataSource {
     };
   }
 
-  async getAllPosts() {
+  async getNews() {
     const response = await this.get("/");
 
     const responsePosts = response.articles;

@@ -1,17 +1,46 @@
 import { saveData, getData } from "../redis/cache";
 import { logger } from "../log";
 
-export const getAPIData = async (api: any, apiName: string, dataPath: string) => {
+enum Response {
+  twitter = "tweets",
+  youtube = "videos",
+  news = "news",
+  redits = "post"
+}
+
+
+
+export const getAPIData = async (
+  api: any,
+  apiName: keyof typeof Response,
+  dataPath: string
+) => {
   try {
     const data: string = await getData(apiName);
     if (data) return JSON.parse(data);
-    if (!data) return await getFromSource(api, "/", dataPath);
+    if (!data)
+      return await getFromSource({
+        api,
+        url: "/",
+        dataArray: dataPath,
+        apiName,
+      });
   } catch (e) {
     throw new Error("Error fetching data, please try reloading the page.");
   }
 };
 
-export const getFromSource = async (api: any, url = "/", dataArray: any) => {
+export const getFromSource = async ({
+  api,
+  url = "/",
+  dataArray,
+  apiName,
+}: {
+  api: any;
+  url?: string;
+  dataArray: string;
+  apiName: keyof typeof Response;
+}) => {
   const response = await api.get(url);
 
   const urlPath = dataArray.split(".").map((word: string) => word.trim());
@@ -21,11 +50,12 @@ export const getFromSource = async (api: any, url = "/", dataArray: any) => {
     response
   );
 
+
   if (Array.isArray(urlDataArray)) {
     try {
       const data = urlDataArray.map((items: any) => api.dataReducer(items));
 
-      const result = await saveData("youtube", JSON.stringify(data), 600);
+      const result = await saveData(apiName, JSON.stringify(data), 600);
 
       logger.info({ message: result });
 
@@ -34,6 +64,6 @@ export const getFromSource = async (api: any, url = "/", dataArray: any) => {
       logger.error(e);
     }
   } else {
-    throw new Error("No videos found");
+    throw new Error(`No ${Response[apiName]} found`);
   }
 };

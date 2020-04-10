@@ -25,7 +25,7 @@ class RedditAPI extends RESTDataSource {
     };
   }
 
-  async getAllPosts() {
+  async getRedits() {
     const response = await this.get("/");
 
     const responsePosts = response.data.children;
