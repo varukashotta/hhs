@@ -1,5 +1,6 @@
 import { RESTDataSource }from "apollo-datasource-rest";
 import dotenv from "dotenv";
+import { getAPIData } from "./utils";
 
 dotenv.config();
 
@@ -10,7 +11,7 @@ class RedditAPI extends RESTDataSource {
       `https://www.reddit.com/r/Coronavirus/top.json?limit=50`;
   }
 
-  postsReducer(post: any) {
+  dataReducer(post: any) {
 
     const {id, title, permalink, created_utc, author_fullname, thumbnail} = post.data;
 
@@ -26,14 +27,7 @@ class RedditAPI extends RESTDataSource {
   }
 
   async getRedits() {
-    const response = await this.get("/");
-
-    const responsePosts = response.data.children;
-
-
-    return Array.isArray(responsePosts)
-      ? responsePosts.map((posts: any) => this.postsReducer(posts))
-      : [];
+    return await getAPIData(this, "redits", "data.children");
   }
 }
 
