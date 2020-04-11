@@ -1,7 +1,7 @@
 import { csvToJson, readLocalFile } from "../utils/index";
 import graphqlClient from "../utils/GraphQLRequest";
 import moment from "moment";
-import { addSearchDoc } from "../search/elasticsearch";
+import { searchDoc } from "../search/elasticsearch";
 
 const saveRow = `mutation($admin: String!, $active: Int!, $combinedKey: String!, $confirmed: Int!, $coordinates: point!, $countryRegion: String!, $lastUpdated: date!, $deaths: Int!, $fips: Int!, $provinceState: String!, $recovered: Int!){
     insert_recorded(objects: {admin: $admin, active: $active, combined_key: $combinedKey, confirmed: $confirmed, coordinates: $coordinates,
@@ -92,18 +92,14 @@ async function runShow(rows: any) {
         const result = await addCountryToDB(input);
 
         if (result) {
-          console.log(result.insert_recorded.returning);
-
           await new Promise(async (resolve, reject) => {
             if (result && result.insert_recorded.returning.length > 0) {
-              // console.log(result.insert_recorded.returning);
-              let s = await addSearchDoc({
-                phrase: result.insert_recorded.returning[0],
-              });
 
-              // console.log({se});
+              const {last_updated, combined_key} = result.insert_recorded.returning[0];
 
-              console.log({ s });
+              const updatedRecord = await searchDoc(last_updated, combined_key, result.insert_recorded.returning[0]);
+
+              console.log({ updatedRecord });
 
               resolve(true);
             } else {

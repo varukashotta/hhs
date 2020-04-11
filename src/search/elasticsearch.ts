@@ -26,7 +26,7 @@ export const addSearchDoc = async (params: any) => {
   });
 };
 
-export const searchDoc = async (date: string, combinedKey: string) => {
+export const searchDoc = async (date: string, combinedKey: string, record: any) => {
   const { body } = await client.search({
     index: INDEX,
     body: {
@@ -53,16 +53,21 @@ export const searchDoc = async (date: string, combinedKey: string) => {
 
   if (body.hits.hits.length > 0) {
     try {
-      const result = await updateDoc(body.hits.hits[0]._id);
+      const result = await updateDoc(body.hits.hits[0]._id, record);
 
       console.log(result);
     } catch (e) {
       console.log(e);
     }
+  } else {
+    await addSearchDoc({phrase: record})
   }
 };
 
-export const updateDoc = async (id: string) => {
+export const updateDoc = async (id: string, record: any) => {
+
+  const {active, confirmed, deaths, recovered} = record;
+
   return new Promise(async (resolve, reject) => {
     try {
       const { body } = await client.update({
@@ -70,9 +75,10 @@ export const updateDoc = async (id: string) => {
         id: `${id}`,
         body: {
           doc: {
-            active: 0,
-            confirmed: 8,
-            deaths: 0,
+            active,
+            confirmed,
+            deaths,
+            recovered
           },
         },
       });
@@ -84,44 +90,3 @@ export const updateDoc = async (id: string) => {
   });
 };
 
-// async function run () {
-//   // Let's start by indexing some data
-//   await client.index({
-//     index: 'game-of-thrones',
-//     body: {
-//       character: 'Ned Stark',
-//       quote: 'Winter is coming.'
-//     }
-//   })
-//   await client.index({
-//     index: 'game-of-thrones',
-//     body: {
-//       character: 'Daenerys Targaryen',
-//       quote: 'I am the mother of dragons.'
-//     }
-//   })
-//   await client.index({
-//     index: 'game-of-thrones',
-//     // here we are forcing an index refresh,
-//     // otherwise we will not get any result
-//     // in the consequent search
-//     refresh: true,
-//     body: {
-//       character: 'Tyrion Lannister',
-//       quote: 'A mind needs books like a sword needs a whetstone.'
-//     }
-//   })
-//   // Let's search!
-//   const { body } = await client.search({
-//     index: 'game-of-thrones',
-//     body: {
-//       query: {
-//         match: {
-//           quote: 'winter'
-//         }
-//       }
-//     }
-//   })
-//   console.log(body.hits.hits)
-// }
-// run().catch(console.log)
