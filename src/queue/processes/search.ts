@@ -13,7 +13,7 @@ import { logger } from "../../log/index";
 //   attempts: 3,
 // };
 
-const processSearch = async (
+const processSearchQueue = async (
   data: any,
   options = {},
   callback: (arg0: any, arg1: any) => any
@@ -39,4 +39,4 @@ const processSearch = async (
   }
 };
 
-export default processSearch;
+export default processSearchQueue;

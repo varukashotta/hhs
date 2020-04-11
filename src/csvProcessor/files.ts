@@ -20,10 +20,10 @@ const foldersQuery = `query{
                                   ...on Tree{
                                     entries{
                                       name
-                                    }                                  
+                                    }
                                   }
                                 }
-                              }   
+                              }
                             }
                           }
                         }
@@ -39,8 +39,7 @@ const foldersQuery = `query{
     }
   }`;
 
-  `
-  query{ 
+const lastUpdateQuery = `query{
     repository(owner: "CSSEGISandData", name: "COVID-19") {
       object(expression: "master") {
         ... on Commit {
@@ -55,6 +54,4 @@ const foldersQuery = `query{
         }
       }
     }
-  
-  }
-  `
+}`;

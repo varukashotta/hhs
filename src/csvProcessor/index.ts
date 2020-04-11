@@ -1,7 +1,7 @@
 import { csvToJson, readLocalFile } from "../utils/index";
 import graphqlClient from "../utils/GraphQLRequest";
 import moment from "moment";
-import { search } from "../search/elasticsearch";
+import { addSearchDoc } from "../search/elasticsearch";
 
 const saveRow = `mutation($admin: String!, $active: Int!, $combinedKey: String!, $confirmed: Int!, $coordinates: point!, $countryRegion: String!, $lastUpdated: date!, $deaths: Int!, $fips: Int!, $provinceState: String!, $recovered: Int!){
     insert_recorded(objects: {admin: $admin, active: $active, combined_key: $combinedKey, confirmed: $confirmed, coordinates: $coordinates,
@@ -19,6 +19,7 @@ const saveRow = `mutation($admin: String!, $active: Int!, $combinedKey: String!,
         updated_at
         province_state
         created_at
+        recovered
       }
     }
   }
@@ -91,9 +92,12 @@ async function runShow(rows: any) {
         const result = await addCountryToDB(input);
 
         if (result) {
+          console.log(result.insert_recorded.returning);
+
           await new Promise(async (resolve, reject) => {
             if (result && result.insert_recorded.returning.length > 0) {
-              let s = await search({
+              // console.log(result.insert_recorded.returning);
+              let s = await addSearchDoc({
                 phrase: result.insert_recorded.returning[0],
               });
 
@@ -103,7 +107,6 @@ async function runShow(rows: any) {
 
               resolve(true);
             } else {
-              
               resolve("se");
             }
           });

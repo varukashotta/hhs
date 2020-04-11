@@ -4,14 +4,16 @@ import dotenv from "dotenv";
 import RedditAPI from "./datasources/reddit";
 import NewsAPI from "./datasources/news";
 import TwitterAPI from "./datasources/twitter";
-import { getCSV } from "./csvProcessor/index";
-import useRedis from "./redis/index";
+import { search } from './search/elasticsearch';
+import { getCSV } from "./csvProcessor";
 
 const EventEmitter = require("events");
 EventEmitter.defaultMaxListeners = 100;
 dotenv.config();
 
-// getCSV();
+getCSV();
+
+// search();
 
 
 const typeDefs = gql`
