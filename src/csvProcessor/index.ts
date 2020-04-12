@@ -2,6 +2,8 @@ import { csvToJson, readLocalFile } from "../utils/index";
 import graphqlClient from "../utils/GraphQLRequest";
 import moment from "moment";
 import { searchDoc } from "../search/elasticsearch";
+import { millisecondsToMinutesAndSeconds } from "../datasources/utils";
+import { logger } from "../log";
 
 const saveRow = `mutation($admin: String!, $active: Int!, $combinedKey: String!, $confirmed: Int!, $coordinates: point!, $countryRegion: String!, $lastUpdated: date!, $deaths: Int!, $fips: Int!, $provinceState: String!, $recovered: Int!){
     insert_recorded(objects: {admin: $admin, active: $active, combined_key: $combinedKey, confirmed: $confirmed, coordinates: $coordinates,
@@ -49,12 +51,19 @@ export const addCountryToDB = async (params: any) => {
     const result = await graphqlClient.request(saveRow, params);
     return result;
   } catch (e) {
-    console.log(e);
+    logger.error(e);
   }
 };
 
 async function runShow(rows: any) {
+  const start = new Date().getTime();
+  let i = 0;
+
   for (const row of rows) {
+    i++;
+
+    const loopStart = new Date().getTime();
+
     if (row.Country_Region) {
       try {
         const {
@@ -89,17 +98,30 @@ async function runShow(rows: any) {
           // tslint:disable-next-line: radix
           fips: parseInt(FIPS) ? parseInt(FIPS) : 0,
         };
-        const result = await addCountryToDB(input);
+        const addedRowResult = await addCountryToDB(input);
 
-        if (result) {
+        logger.info(addedRowResult.insert_recorded.returning[0].id);
+
+        if (addedRowResult) {
           await new Promise(async (resolve, reject) => {
-            if (result && result.insert_recorded.returning.length > 0) {
+            if (
+              addedRowResult &&
+              addedRowResult.insert_recorded.returning.length > 0
+            ) {
+              const {
+                last_updated,
+                combined_key,
+              } = addedRowResult.insert_recorded.returning[0];
 
-              const {last_updated, combined_key} = result.insert_recorded.returning[0];
+              const updatedRecord = await searchDoc(
+                last_updated,
+                combined_key,
+                addedRowResult.insert_recorded.returning[0]
+              );
 
-              const updatedRecord = await searchDoc(last_updated, combined_key, result.insert_recorded.returning[0]);
+              console.log(updatedRecord);
 
-              console.log({ updatedRecord });
+              // logger.info({ updatedRecord });
 
               resolve(true);
             } else {
@@ -108,8 +130,18 @@ async function runShow(rows: any) {
           });
         }
       } catch (e) {
-        console.log(e);
+        logger.error(e);
       }
     }
+    // logger.info({ message: i });
+    // const end = new Date().getTime();
+    // const time = end - start;
+    // const loopTime = end - loopStart;
+
+    // logger.info("Loop Execution time: " + millisecondsToMinutesAndSeconds(loopTime));
+    // logger.info("Execution time: " + millisecondsToMinutesAndSeconds(time));
   }
+  // const end = new Date().getTime();
+  // const time = end - start;
+  // logger.info("Execution time: " + millisecondsToMinutesAndSeconds(time));
 }

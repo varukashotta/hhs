@@ -23,7 +23,7 @@ const processSearchQueue = async (
   try {
     await searchQueue.add(data, options);
   } catch (e) {
-    logger.error(e);
+    console.error(e);
   }
 
   try {

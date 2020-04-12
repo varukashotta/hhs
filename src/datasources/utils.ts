@@ -67,3 +67,10 @@ export const getFromSource = async ({
     throw new Error(`No ${Response[apiName]} found`);
   }
 };
+
+
+export const millisecondsToMinutesAndSeconds = (milliseconds:number) => {
+  const minutes = Math.floor(milliseconds / 60000);
+  const seconds:any = ((milliseconds % 60000) / 1000).toFixed(0);
+  return minutes + ":" + (seconds < 10 ? '0' : '') + seconds;
+}
