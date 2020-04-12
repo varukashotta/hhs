@@ -5,14 +5,17 @@ import RedditAPI from "./datasources/reddit";
 import NewsAPI from "./datasources/news";
 import TwitterAPI from "./datasources/twitter";
 import { getCSV } from "./csvProcessor";
+import { cleanUpCSV } from './csvProcessor/directImport';
 
 const EventEmitter = require("events");
 EventEmitter.defaultMaxListeners = 100;
 dotenv.config();
 
-getCSV();
+// getCSV();
 
 // search();
+
+cleanUpCSV();
 
 
 const typeDefs = gql`
