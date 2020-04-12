@@ -1,5 +1,6 @@
 import { readLocalFile } from "../utils";
 import { csvToJson } from "../utils/index";
+import { logger } from "../log";
 const createCsvWriter = require("csv-writer").createObjectCsvWriter;
 
 export const cleanUpCSV = async () => {
@@ -49,11 +50,11 @@ export const cleanUpCSV = async () => {
 
 export const writeToCsv = (header:any, data:any) => {
   const csvWriter = createCsvWriter({
-    path: "./src/datasources/date.csv",
+    path: "./src/data/date.csv",
     header,
   });;
 
   csvWriter
     .writeRecords(data)
-    .then(() => console.log("The CSV file was written successfully"));
+    .then(() => logger.info({message: "The CSV file was written successfully"}));
 };
