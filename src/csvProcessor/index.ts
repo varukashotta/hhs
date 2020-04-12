@@ -119,13 +119,15 @@ async function runShow(rows: any) {
                 addedRowResult.insert_recorded.returning[0]
               );
 
-              console.log(updatedRecord);
 
               // logger.info({ updatedRecord });
 
+              console.log({ updatedRecord });
+
+
               resolve(true);
             } else {
-              resolve("se");
+              reject(new Error(`Could not add ${addedRowResult.insert_recorded.returning[0].id} to search queue`));
             }
           });
         }
@@ -133,15 +135,15 @@ async function runShow(rows: any) {
         logger.error(e);
       }
     }
-    // logger.info({ message: i });
-    // const end = new Date().getTime();
-    // const time = end - start;
-    // const loopTime = end - loopStart;
+    logger.info({ message: i });
+    const end = new Date().getTime();
+    const time = end - start;
+    const loopTime = end - loopStart;
 
-    // logger.info("Loop Execution time: " + millisecondsToMinutesAndSeconds(loopTime));
-    // logger.info("Execution time: " + millisecondsToMinutesAndSeconds(time));
+    logger.info("Loop Execution time: " + millisecondsToMinutesAndSeconds(loopTime));
+    logger.info("Execution time: " + millisecondsToMinutesAndSeconds(time));
   }
-  // const end = new Date().getTime();
-  // const time = end - start;
-  // logger.info("Execution time: " + millisecondsToMinutesAndSeconds(time));
+  const end = new Date().getTime();
+  const time = end - start;
+  logger.info("Execution time: " + millisecondsToMinutesAndSeconds(time));
 }

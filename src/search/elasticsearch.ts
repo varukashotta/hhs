@@ -62,11 +62,8 @@ export const searchDoc = async (
       try {
         const result = await updateDoc(body.hits.hits[0]._id, record);
 
-        console.log(result);
-
         resolve(result);
       } catch (error) {
-        console.log(error);
 
         reject(error);
       }
@@ -100,7 +97,7 @@ export const updateDoc = async (id: string, record: any) => {
         },
       });
 
-      resolve(body.hits);
+      resolve(body);
     } catch (error) {
       reject(error);
     }
