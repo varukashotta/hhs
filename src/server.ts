@@ -1,3 +1,19 @@
+if (process.env.NODE_ENV === "production") {
+  // Add this to the VERY top of the first file loaded in your app
+  var apm = require("elastic-apm-node").start({
+    // Override service name from package.json
+    // Allowed characters: a-z, A-Z, 0-9, -, _, and space
+    serviceName: "hhs",
+
+    // Use if APM Server requires a token
+    secretToken: "0gcOqtwZe2LBLhFWuA",
+
+    // Set custom APM Server URL (default: http://localhost:8200)
+    serverUrl:
+      "https://5937c8a340f749e8b814d3753ae70cd2.apm.ap-southeast-2.aws.cloud.es.io:443",
+  });
+}
+
 import { ApolloServer, gql } from "apollo-server";
 import YoutubeAPI from "./datasources/youtube";
 import dotenv from "dotenv";
@@ -5,18 +21,58 @@ import RedditAPI from "./datasources/reddit";
 import NewsAPI from "./datasources/news";
 import TwitterAPI from "./datasources/twitter";
 import { getCSV } from "./csvProcessor";
-import { cleanUpCSV } from './csvProcessor/directImport';
-
+import { cleanUpCSV } from "./csvProcessor/directImport";
+import { sendToDB } from "./csvProcessor/dbImport";
+import { readLocalFile } from "./utils";
+import fs from "fs";
+import { addSearchDoc, ElasticSearchClient } from "./search/elasticsearch";
 const EventEmitter = require("events");
 EventEmitter.defaultMaxListeners = 100;
 dotenv.config();
 
-// getCSV();
+// const test = async() => {
+//   try {
+//     const client = await ElasticSearchClient();
+//     const result = await client.index({
+//       index: "human-hope-today",
+//       refresh: "true",
+//       body: {
+//         "info": "phrase"
+//       },
+//     });
+//     console.log(result.body);
+//   } catch (e) {
+//     console.log(e);
+//   }
+
+// }
+
+// test()
+
+// sendToDB();
+
+getCSV();
 
 // search();
 
-cleanUpCSV();
+// const go = async () => {
+//   const file: any = await fs.readFileSync("./src/data/date.csv");
 
+//   let csv: string = String(file);
+
+//   csv = csv.replace(/,/g, "\t");
+
+//   // console.log(String(csv));
+
+//   csv = csv.replace(/"[^"]+"/g, function(match) {
+//     return match.replace(/\t/g, ",");
+//   });
+
+//   fs.writeFile("test-sync.csv", csv, (err) => console.log(err));
+//   // sendToDB()
+// };
+
+// go();
 
 const typeDefs = gql`
   scalar Date

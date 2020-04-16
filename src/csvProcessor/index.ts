@@ -39,7 +39,9 @@ export const getCSV = async () => {
 
     const convertedResult = csvToJson(String(result));
 
-    addRowsToDB(convertedResult);
+    console.log(convertedResult);
+
+    // addRowsToDB(convertedResult);
   } catch (error) {
     // handle error
     return error;

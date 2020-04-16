@@ -1,31 +1,67 @@
 import { Client } from "@elastic/elasticsearch";
 import processSearchQueue from "../queue/processes/search";
-const client = new Client({ node: "http://search.alvail.com:9200" });
+import dotenv from "dotenv";
+import { logger } from "../log";
+
+dotenv.config();
+
+export const ElasticSearchClient = (): any => {
+  return new Promise((resolve, reject) => {
+    try {
+      const client = new Client({
+        node: `${process.env.ELASTIC_SEARCH_SERVER_URL}`,
+        auth: {
+          apiKey: {
+            api_key: `${process.env.ELASTIC_SEARCH_SERVER_API_KEY}`,
+            id:  `${process.env.ELASTIC_SEARCH_SERVER_API_ID}`,
+          },
+        },
+      });
+
+      client.ping({}, (error: any) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(client);
+        }
+      });
+    } catch (e) {
+      reject(e);
+    }
+  });
+};
 
 const INDEX = "human-hope-today";
 
 export const addSearchDoc = async (params: any) => {
-  return new Promise((resolve, reject) => {
-  processSearchQueue(params, undefined, async (info, job) => {
-    try {
-      const result = await client.index({
-        index: INDEX,
-        refresh: "true",
-        body: info.phrase,
+  const executeSearch = (client:any) => {
+      return new Promise((resolve: (arg0: any) => void, reject: (arg0: any) => void) => {
+        processSearchQueue(params, undefined, async (info, job) => {
+          try {
+            const result = await client.index({
+              index: INDEX,
+              refresh: "true",
+              body: info.phrase,
+            });
+
+            resolve(result);
+
+          } catch (error) {
+
+            reject(error);
+          }
+        });
       });
+  };
 
-      // console.log(job);
+  try {
+    let client: any = await ElasticSearchClient();
+    executeSearch(client);
+  } catch (e) {
+    // logger.error(e);
+    console.log('Error cannot connect');
 
-      resolve(result);
-
-      // return result;
-    } catch (error) {
-      console.log(error);
-
-      reject(error);
-    }
-  });
-});
+  }
 };
 
 export const searchDoc = async (
@@ -33,6 +69,8 @@ export const searchDoc = async (
   combinedKey: string,
   record: any
 ) => {
+  const client: Client = await ElasticSearchClient();
+
   return new Promise(async (resolve, reject) => {
     const { body } = await client.search({
       index: INDEX,
@@ -64,7 +102,6 @@ export const searchDoc = async (
 
         resolve(result);
       } catch (error) {
-
         reject(error);
       }
     } else {
@@ -81,6 +118,8 @@ export const searchDoc = async (
 
 export const updateDoc = async (id: string, record: any) => {
   const { active, confirmed, deaths, recovered } = record;
+
+  const client: Client = await ElasticSearchClient();
 
   return new Promise(async (resolve, reject) => {
     try {

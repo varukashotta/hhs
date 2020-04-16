@@ -14,7 +14,7 @@ export const readLocalFile = async (file: string) => {
 export const csvToJson = (csv: string) => {
   const lines = csv.split("\n");
 
-  const result = [];
+  // const result = [];
 
   const commaRegex = /,(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)/g;
 
@@ -23,6 +23,8 @@ export const csvToJson = (csv: string) => {
   const headers = lines[0]
     .split(commaRegex)
     .map(h => h.replace(quotesRegex, "$1"));
+
+    let final = "";
 
   for (let i = 1; i < lines.length; i++) {
     const obj: any = {};
@@ -34,9 +36,14 @@ export const csvToJson = (csv: string) => {
       }
     }
 
-    result.push(obj);
+    if(Object.keys(obj).length !== 0 && obj.constructor == Object){
+      final += '{"index":{}}' + "\n" + JSON.stringify(obj) + "\n" ;
+    }
+    // result.push({"index":{}})
+    // result.push(obj);
   }
-  return result;
+
+  return final
 };
 
 export const getUniqueColumnValuesFromCsv = (

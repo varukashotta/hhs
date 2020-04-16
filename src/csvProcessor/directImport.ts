@@ -2,12 +2,13 @@ import { readLocalFile } from "../utils";
 import { csvToJson } from "../utils/index";
 import { logger } from "../log";
 const createCsvWriter = require("csv-writer").createObjectCsvWriter;
+const fs = require('fs');
 
 export const cleanUpCSV = async () => {
 
-  const file: string | void = await readLocalFile("../data/04-02-2020.csv");
+  const file: any = await readLocalFile("../data/04-02-2020.csv");
 
-  const csv:string = String(file);
+  let csv:string = String(file);
 
   const lines = csv.split("\n");
 
@@ -48,7 +49,7 @@ export const cleanUpCSV = async () => {
   writeToCsv(header, result)
 };
 
-export const writeToCsv = (header:any, data:any) => {
+export const writeToCsv = async (header:any, data:any) => {
   const csvWriter = createCsvWriter({
     path: "./src/data/date.csv",
     header,
@@ -57,4 +58,5 @@ export const writeToCsv = (header:any, data:any) => {
   csvWriter
     .writeRecords(data)
     .then(() => logger.info({message: "The CSV file was written successfully"}));
+
 };
