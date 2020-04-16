@@ -1,18 +1,4 @@
-if (process.env.NODE_ENV === "production") {
-  // Add this to the VERY top of the first file loaded in your app
-  var apm = require("elastic-apm-node").start({
-    // Override service name from package.json
-    // Allowed characters: a-z, A-Z, 0-9, -, _, and space
-    serviceName: "hhs",
 
-    // Use if APM Server requires a token
-    secretToken: "0gcOqtwZe2LBLhFWuA",
-
-    // Set custom APM Server URL (default: http://localhost:8200)
-    serverUrl:
-      "https://5937c8a340f749e8b814d3753ae70cd2.apm.ap-southeast-2.aws.cloud.es.io:443",
-  });
-}
 
 import { ApolloServer, gql } from "apollo-server";
 import YoutubeAPI from "./datasources/youtube";
@@ -26,9 +12,31 @@ import { sendToDB } from "./csvProcessor/dbImport";
 import { readLocalFile } from "./utils";
 import fs from "fs";
 import { addSearchDoc, ElasticSearchClient } from "./search/elasticsearch";
+import { logger } from './log/index';
 const EventEmitter = require("events");
 EventEmitter.defaultMaxListeners = 100;
+
 dotenv.config();
+
+console.log(process.env.NODE_ENV);
+
+
+var apm = require("elastic-apm-node").start({
+  // Override service name from package.json
+  // Allowed characters: a-z, A-Z, 0-9, -, _, and space
+  serviceName: "hhs",
+
+  environment: `${process.env.NODE_ENV}`,
+
+  // Use if APM Server requires a token
+  secretToken: "0gcOqtwZe2LBLhFWuA",
+
+  // Set custom APM Server URL (default: http://localhost:8200)
+  serverUrl:
+    "https://5937c8a340f749e8b814d3753ae70cd2.apm.ap-southeast-2.aws.cloud.es.io:443",
+});
+
+logger.info("Wadeda");
 
 // const test = async() => {
 //   try {
@@ -51,7 +59,7 @@ dotenv.config();
 
 // sendToDB();
 
-getCSV();
+// getCSV();
 
 // search();
 
