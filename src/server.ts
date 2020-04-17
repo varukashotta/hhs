@@ -13,6 +13,7 @@ import { readLocalFile } from "./utils";
 import fs from "fs";
 import { addSearchDoc, ElasticSearchClient } from "./search/elasticsearch";
 import { logger } from './log/index';
+import { gitHub } from './csvProcessor/getData';
 const EventEmitter = require("events");
 EventEmitter.defaultMaxListeners = 100;
 
@@ -81,6 +82,11 @@ logger.info("Wadeda");
 // };
 
 // go();
+const go = async() => {
+  console.log(await gitHub());
+}
+
+// go();
 
 const typeDefs = gql`
   scalar Date
@@ -103,6 +109,7 @@ const typeDefs = gql`
     reddit: [Info]
     news: [Info]
     twitter: [Info]
+    execute: String!
   }
 `;
 
@@ -122,6 +129,9 @@ const resolvers = {
     twitter: async (_source: any, { id }: any, { dataSources }: any) => {
       return dataSources.twitterAPI.getTweets();
     },
+    execute: async() => {
+      return 'Helo';
+    }
   },
 };
 
