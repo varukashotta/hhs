@@ -21,6 +21,7 @@ export const gitHub = async ():Promise<string> => {
         connection = await gitHubAPI.request(foldersQuery);
       } catch (e) {
         console.log(e.response.message);
+        reject(new Error('Cannot connect to github'))
       }
     };
 
