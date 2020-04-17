@@ -1,4 +1,4 @@
 
-import unleashDragon from "./index";
+const unleashDragon = require("./index");
 
 unleashDragon();
