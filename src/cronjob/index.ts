@@ -4,4 +4,4 @@ const unleashDragon = async () => {
   });
 };
 
-module.exports = unleashDragon;
+export default unleashDragon;
