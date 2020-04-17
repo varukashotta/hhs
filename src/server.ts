@@ -1,18 +1,18 @@
 
-var apm = require("elastic-apm-node").start({
-  // Override service name from package.json
-  // Allowed characters: a-z, A-Z, 0-9, -, _, and space
-  serviceName: "hhs",
+// var apm = require("elastic-apm-node").start({
+//   // Override service name from package.json
+//   // Allowed characters: a-z, A-Z, 0-9, -, _, and space
+//   serviceName: "hhs",
 
-  environment: `${process.env.NODE_ENV}`,
+//   environment: `${process.env.NODE_ENV}`,
 
-  // Use if APM Server requires a token
-  secretToken: "0gcOqtwZe2LBLhFWuA",
+//   // Use if APM Server requires a token
+//   secretToken: "0gcOqtwZe2LBLhFWuA",
 
-  // Set custom APM Server URL (default: http://localhost:8200)
-  serverUrl:
-    "https://5937c8a340f749e8b814d3753ae70cd2.apm.ap-southeast-2.aws.cloud.es.io:443",
-});
+//   // Set custom APM Server URL (default: http://localhost:8200)
+//   serverUrl:
+//     "https://5937c8a340f749e8b814d3753ae70cd2.apm.ap-southeast-2.aws.cloud.es.io:443",
+// });
 
 
 import { ApolloServer, gql } from "apollo-server";
@@ -30,7 +30,7 @@ import { addSearchDoc, ElasticSearchClient } from "./search/elasticsearch";
 import { logger } from './log/index';
 import { gitHub } from './csvProcessor/getData';
 // tslint:disable-next-line: no-var-requires
-const unleashDragon = require('./cronjob/index');
+// const unleashDragon = require('./cronjob/index');
 
 
 const EventEmitter = require("events");
@@ -136,7 +136,7 @@ const resolvers = {
     execute: async(_parent: any, _args: any, _context: any, _info: any) => {
       // console.log(_parent, _info, _context, _args );
       
-      return await unleashDragon();
+      return 'await unleashDragon()';
     }
   },
 };
