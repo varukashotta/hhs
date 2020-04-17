@@ -29,6 +29,8 @@ import fs from "fs";
 import { addSearchDoc, ElasticSearchClient } from "./search/elasticsearch";
 import { logger } from './log/index';
 import { gitHub } from './csvProcessor/getData';
+// tslint:disable-next-line: no-var-requires
+const unleashDragon = require('./cronjob/index');
 
 
 const EventEmitter = require("events");
@@ -134,7 +136,7 @@ const resolvers = {
     execute: async(_parent: any, _args: any, _context: any, _info: any) => {
       // console.log(_parent, _info, _context, _args );
       
-      return 'Yes'
+      return await unleashDragon();
     }
   },
 };
