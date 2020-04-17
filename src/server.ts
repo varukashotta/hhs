@@ -1,27 +1,4 @@
 
-
-import { ApolloServer, gql } from "apollo-server";
-import YoutubeAPI from "./datasources/youtube";
-import dotenv from "dotenv";
-import RedditAPI from "./datasources/reddit";
-import NewsAPI from "./datasources/news";
-import TwitterAPI from "./datasources/twitter";
-import { getCSV } from "./csvProcessor";
-import { cleanUpCSV } from "./csvProcessor/directImport";
-import { sendToDB } from "./csvProcessor/dbImport";
-import { readLocalFile } from "./utils";
-import fs from "fs";
-import { addSearchDoc, ElasticSearchClient } from "./search/elasticsearch";
-import { logger } from './log/index';
-import { gitHub } from './csvProcessor/getData';
-const EventEmitter = require("events");
-EventEmitter.defaultMaxListeners = 100;
-
-dotenv.config();
-
-console.log(process.env.NODE_ENV);
-
-
 var apm = require("elastic-apm-node").start({
   // Override service name from package.json
   // Allowed characters: a-z, A-Z, 0-9, -, _, and space
@@ -37,7 +14,33 @@ var apm = require("elastic-apm-node").start({
     "https://5937c8a340f749e8b814d3753ae70cd2.apm.ap-southeast-2.aws.cloud.es.io:443",
 });
 
-logger.info("Wadeda");
+
+import { ApolloServer, gql } from "apollo-server";
+import YoutubeAPI from "./datasources/youtube";
+import dotenv from "dotenv";
+import RedditAPI from "./datasources/reddit";
+import NewsAPI from "./datasources/news";
+import TwitterAPI from "./datasources/twitter";
+import { getCSV } from "./csvProcessor";
+import { cleanUpCSV } from "./csvProcessor/directImport";
+import { sendToDB } from "./csvProcessor/dbImport";
+import { readLocalFile } from "./utils";
+import fs from "fs";
+import { addSearchDoc, ElasticSearchClient } from "./search/elasticsearch";
+import { logger } from './log/index';
+import { gitHub } from './csvProcessor/getData';
+import unleashDragon from './cronjob/index';
+
+
+const EventEmitter = require("events");
+EventEmitter.defaultMaxListeners = 100;
+
+dotenv.config();
+
+console.log(process.env.NODE_ENV);
+
+
+
 
 // const test = async() => {
 //   try {
@@ -129,8 +132,10 @@ const resolvers = {
     twitter: async (_source: any, { id }: any, { dataSources }: any) => {
       return dataSources.twitterAPI.getTweets();
     },
-    execute: async() => {
-      return 'Helo';
+    execute: async(_parent: any, _args: any, _context: any, _info: any) => {
+      // console.log(_parent, _info, _context, _args );
+      
+      return await unleashDragon();
     }
   },
 };
