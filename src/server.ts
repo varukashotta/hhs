@@ -1,11 +1,11 @@
 // tslint:disable-next-line: no-var-requires
-require("elastic-apm-node").start({
-  serviceName: "hhs",
-  environment: `${process.env.NODE_ENV}`,
-  secretToken: "0gcOqtwZe2LBLhFWuA",
-  serverUrl:
-    "https://5937c8a340f749e8b814d3753ae70cd2.apm.ap-southeast-2.aws.cloud.es.io:443",
-});
+// require("elastic-apm-node").start({
+//   serviceName: "hhs",
+//   environment: `${process.env.NODE_ENV}`,
+//   secretToken: "0gcOqtwZe2LBLhFWuA",
+//   serverUrl:
+//     "https://5937c8a340f749e8b814d3753ae70cd2.apm.ap-southeast-2.aws.cloud.es.io:443",
+// });
 
 // tslint:disable-next-line: no-var-requires
 const EventEmitter = require("events");

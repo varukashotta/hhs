@@ -12,7 +12,7 @@ const gitHubAPI: GraphQLClient = new GraphQLClient(
   }
 );
 
-export const gitHub = async () => {
+export const gitHub = async ():Promise<string> => {
   return new Promise(async (resolve, reject) => {
     let connection: any;
 
