@@ -29,7 +29,6 @@ import fs from "fs";
 import { addSearchDoc, ElasticSearchClient } from "./search/elasticsearch";
 import { logger } from './log/index';
 import { gitHub } from './csvProcessor/getData';
-import unleashDragon from './cronjob/index';
 
 
 const EventEmitter = require("events");
@@ -135,7 +134,7 @@ const resolvers = {
     execute: async(_parent: any, _args: any, _context: any, _info: any) => {
       // console.log(_parent, _info, _context, _args );
       
-      return await unleashDragon();
+      return 'Yes'
     }
   },
 };
