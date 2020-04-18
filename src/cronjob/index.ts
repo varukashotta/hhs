@@ -14,11 +14,10 @@ interface IProps {
 
 let result: IProps;
 
-const checkCsvFile = () => {
+const listCSVDirectory = () => {
   return new Promise(async (resolve, reject) => {
     try {
       const files: string[] = await fs.readdirSync(csvFolder);
-
       resolve(files);
     } catch (e) {
       reject(e);
@@ -30,8 +29,7 @@ const checkIfMatchingCSVExists = async (): Promise<any> => {
   const { lastCommittedTime } = result;
   return new Promise(async (resolve, reject) => {
     try {
-      const filesStored: any = await checkCsvFile();
-
+      const filesStored: any = await listCSVDirectory();
       const fileFound =
         filesStored &&
         filesStored.filter((file: any) => file.includes(lastCommittedTime));
@@ -73,7 +71,7 @@ export const writeToFile = async (data: any) => {
         String(data.data)
       );
 
-      const comparedCSV = await checkIfMatchingCSVExists();
+      const comparedCSV = await checkCSVDates();
       resolve(comparedCSV);
     } catch (error) {
       reject(error);
@@ -82,7 +80,9 @@ export const writeToFile = async (data: any) => {
 };
 
 export const checkCSVDates = async () => {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
+    let files = await listCSVDirectory();
+    console.log(files)
     resolve("Wadeda");
   });
 };
@@ -91,9 +91,9 @@ const unleashDragon = async () => {
   return new Promise(async (resolve, reject) => {
     try {
       result = await gitHub();
-      const { fileName, lastCommittedTime } = result;
+      const {lastCommittedTime } = result;
       if (lastCommittedTime) {
-        const files = await checkCsvFile();
+        const files = await checkIfMatchingCSVExists();
         resolve(files);
       } else {
         logger.error("Error retrieving data from github!");
