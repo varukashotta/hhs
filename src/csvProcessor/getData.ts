@@ -12,7 +12,7 @@ const gitHubAPI: GraphQLClient = new GraphQLClient(
   }
 );
 
-export const gitHub = async ():Promise<string> => {
+export const gitHub = async ():Promise<{fileName: string, lastCommittedTime: string}> => {
   return new Promise(async (resolve, reject) => {
     let connection: any;
 
@@ -67,7 +67,7 @@ export const gitHub = async ():Promise<string> => {
         const fileInfo = commitTime.repository.object.history.edges;
 
         if (fileInfo.length > 0) {
-          resolve(fileInfo[0].node.committedDate);
+          resolve({fileName: sortedDates[0], lastCommittedTime: fileInfo[0].node.committedDate});
         } else {
           reject(new Error("No file details found!"));
         }
