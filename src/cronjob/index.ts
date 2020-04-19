@@ -14,7 +14,7 @@ interface IProps {
 
 let result: IProps;
 
-const listCSVDirectory = () => {
+const listCSVDirectory = ():Promise<string[]> => {
   return new Promise(async (resolve, reject) => {
     try {
       const files: string[] = await fs.readdirSync(csvFolder);
@@ -80,10 +80,21 @@ export const writeToFile = async (data: any) => {
 };
 
 export const checkCSVDates = async () => {
+  const {fileName} = result;
   return new Promise(async (resolve, reject) => {
-    let files = await listCSVDirectory();
-    console.log(files)
-    resolve("Wadeda");
+    let files:string[] = await listCSVDirectory();
+    console.log(files, result);
+
+    if(files[0].includes(fileName)){
+      //Compare the csv files and update existinxg records
+      resolve("Compare")
+    } else {
+      //Create new records and delete existing file
+      resolve("Create");
+    }
+
+    //TODO: if 2 compare missing else convert to tsv and import to database & search
+    
   });
 };
 

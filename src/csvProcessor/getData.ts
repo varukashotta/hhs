@@ -20,7 +20,6 @@ export const gitHub = async ():Promise<{fileName: string, lastCommittedTime: str
       try {
         connection = await gitHubAPI.request(foldersQuery);
       } catch (e) {
-        console.log(e.response.message);
         reject(new Error('Cannot connect to github'))
       }
     };
