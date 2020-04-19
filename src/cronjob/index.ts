@@ -3,8 +3,11 @@ import { logger } from "../log";
 import fs from "fs";
 import axios from "axios";
 import moment from "moment";
+import { cleanUpCSV } from "../csvProcessor/directImport";
+import { readLocalFile } from "../utils";
 
 const csvFolder = `${__dirname}/../data/`;
+
 const COVID_CSV_REPO =
   "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/";
 interface IProps {
@@ -14,7 +17,7 @@ interface IProps {
 
 let result: IProps;
 
-const listCSVDirectory = ():Promise<string[]> => {
+const listCSVDirectory = (): Promise<string[]> => {
   return new Promise(async (resolve, reject) => {
     try {
       const files: string[] = await fs.readdirSync(csvFolder);
@@ -80,42 +83,69 @@ export const writeToFile = async (data: any) => {
 };
 
 export const checkCSVDates = async () => {
-  const {fileName} = result;
+  const { fileName } = result;
   return new Promise(async (resolve, reject) => {
-    let files:string[] = await listCSVDirectory();
+    let files: string[] = await listCSVDirectory();
     console.log(files, result);
 
-    if(files[0].includes(fileName)){
+    if (files[0].includes(fileName) && files.length > 1) {
       //Compare the csv files and update existinxg records
-      resolve("Compare")
+      resolve("Compare");
     } else {
+      const file = files.filter((csvFile) => csvFile.includes(fileName));
+
+      cleanUpCSV(file[0]);
+
       //Create new records and delete existing file
       resolve("Create");
     }
-
-    //TODO: if 2 compare missing else convert to tsv and import to database & search
-    
   });
 };
 
-const unleashDragon = async () => {
+export const prepareCSv = async () => {
   return new Promise(async (resolve, reject) => {
     try {
-      result = await gitHub();
-      const {lastCommittedTime } = result;
-      if (lastCommittedTime) {
-        const files = await checkIfMatchingCSVExists();
-        resolve(files);
-      } else {
-        logger.error("Error retrieving data from github!");
-        reject(new Error("Error retrieving data from github!"));
-      }
-      resolve(lastCommittedTime);
+      let tsv = await convertCSVtoTSV();
     } catch (e) {
-      logger.error(e);
-      reject(e);
+      reject(new Error("Error converting csv to tsv for database import!"));
     }
   });
+};
+
+export const convertCSVtoTSV = () => {};
+
+const unleashDragon = async () => {
+  // return new Promise(async (resolve, reject) => {
+  //   try {
+  //     result = await gitHub();
+  //     const { lastCommittedTime } = result;
+  //     if (lastCommittedTime) {
+  //       const files = await checkIfMatchingCSVExists();
+  //       resolve(files);
+  //     } else {
+  //       logger.error("Error retrieving data from github!");
+  //       reject(new Error("Error retrieving data from github!"));
+  //     }
+  //     resolve(lastCommittedTime);
+  //   } catch (e) {
+  //     logger.error(e);
+  //     reject(e);
+  //   }
+  // });
+
+  const file: any = await readLocalFile(
+    "../data/1587139200000-2020-04-19T02:00:27Z.csv"
+  );
+
+  let news = file.replace(/,/g, "\t");
+
+  var r = news.replace(/"[^"]+"/g, function(v: string) {
+    return v.replace(/\t/g, ",");
+  });
+
+  console.log(r);
+
+  return "String";
 };
 
 export default unleashDragon;

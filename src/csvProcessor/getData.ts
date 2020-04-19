@@ -12,7 +12,10 @@ const gitHubAPI: GraphQLClient = new GraphQLClient(
   }
 );
 
-export const gitHub = async ():Promise<{fileName: string, lastCommittedTime: string}> => {
+export const gitHub = async (): Promise<{
+  fileName: string;
+  lastCommittedTime: string;
+}> => {
   return new Promise(async (resolve, reject) => {
     let connection: any;
 
@@ -20,7 +23,7 @@ export const gitHub = async ():Promise<{fileName: string, lastCommittedTime: str
       try {
         connection = await gitHubAPI.request(foldersQuery);
       } catch (e) {
-        reject(new Error('Cannot connect to github'))
+        reject(new Error("Cannot connect to github"));
       }
     };
 
@@ -40,8 +43,6 @@ export const gitHub = async ():Promise<{fileName: string, lastCommittedTime: str
                 if (folder.name === "csse_covid_19_daily_reports") {
                   folder.object.entries.map((csv: any) => {
                     if (csv.name.includes(".csv")) {
-                      //   const output =
-                      //     csv.name.substr(0, csv.name.lastIndexOf(".")) || csv.name;
                       csvDates.push(csv);
                     }
                   });
@@ -66,7 +67,10 @@ export const gitHub = async ():Promise<{fileName: string, lastCommittedTime: str
         const fileInfo = commitTime.repository.object.history.edges;
 
         if (fileInfo.length > 0) {
-          resolve({fileName: sortedDates[0], lastCommittedTime: fileInfo[0].node.committedDate});
+          resolve({
+            fileName: sortedDates[0],
+            lastCommittedTime: fileInfo[0].node.committedDate,
+          });
         } else {
           reject(new Error("No file details found!"));
         }

@@ -1,11 +1,11 @@
 import fs from "fs";
 import path from "path";
 
-export const readLocalFile = async (file: string) => {
+export const readLocalFile = (file: string):string => {
   const filePath = path.join(__dirname, file);
 
   try {
-    return await fs.readFileSync(filePath);
+    return String(fs.readFileSync(filePath));
   } catch (error) {
     return error;
   }
