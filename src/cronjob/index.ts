@@ -5,6 +5,7 @@ import axios from "axios";
 import moment from "moment";
 import { cleanUpCSV } from "../csvProcessor/directImport";
 import { readLocalFile } from "../utils";
+import { sendToDB } from '../csvProcessor/dbImport';
 
 const csvFolder = `${__dirname}/../data/`;
 
@@ -112,40 +113,45 @@ export const prepareCSv = async () => {
   });
 };
 
-export const convertCSVtoTSV = () => {};
+export const convertCSVtoTSV = () => {
+    // const file: any = await readLocalFile(
+  //   "../data/1587139200000-2020-04-19T02:00:27Z.csv"
+  // );
 
-const unleashDragon = async () => {
-  // return new Promise(async (resolve, reject) => {
-  //   try {
-  //     result = await gitHub();
-  //     const { lastCommittedTime } = result;
-  //     if (lastCommittedTime) {
-  //       const files = await checkIfMatchingCSVExists();
-  //       resolve(files);
-  //     } else {
-  //       logger.error("Error retrieving data from github!");
-  //       reject(new Error("Error retrieving data from github!"));
-  //     }
-  //     resolve(lastCommittedTime);
-  //   } catch (e) {
-  //     logger.error(e);
-  //     reject(e);
-  //   }
+  // let news = file.replace(/,/g, "\t");
+
+  // var r = news.replace(/"[^"]+"/g, function(v: string) {
+  //   return v.replace(/\t/g, ",");
   // });
 
-  const file: any = await readLocalFile(
-    "../data/1587139200000-2020-04-19T02:00:27Z.csv"
-  );
+  // console.log(r);
 
-  let news = file.replace(/,/g, "\t");
+  // fs.writeFileSync('test.csv', r, 'utf8');
+};
 
-  var r = news.replace(/"[^"]+"/g, function(v: string) {
-    return v.replace(/\t/g, ",");
+const unleashDragon = async () => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      result = await gitHub();
+      const { lastCommittedTime } = result;
+      if (lastCommittedTime) {
+        const files = await checkIfMatchingCSVExists();
+        resolve(files);
+      } else {
+        logger.error("Error retrieving data from github!");
+        reject(new Error("Error retrieving data from github!"));
+      }
+    } catch (e) {
+      logger.error(e);
+      reject(e);
+    }
   });
 
-  console.log(r);
 
-  return "String";
+
+  // await sendToDB();
+
+  // return "String";
 };
 
 export default unleashDragon;

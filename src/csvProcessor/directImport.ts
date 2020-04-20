@@ -1,12 +1,13 @@
 import { readLocalFile } from "../utils";
 import { logger } from "../log";
-import {createObjectCsvWriter} from "csv-writer";
+import { createObjectCsvWriter } from "csv-writer";
 
-export const cleanUpCSV = async (filePath:string) => {
+export const cleanUpCSV = async (filePath: string) => {
+  const file: any = await readLocalFile(
+    "../data/1587225600000-2020-04-20T01:03:58Z.csv"
+  );
 
-  const file: any = await readLocalFile('../data/1587139200000-2020-04-19T02:00:27Z.csv');
-
-  let csv:string = String(file);
+  let csv: string = String(file);
 
   const lines = csv.split("\n");
 
@@ -16,18 +17,23 @@ export const cleanUpCSV = async (filePath:string) => {
 
   const headers = lines[0]
     .split(commaRegex)
-    .map(h => h.replace(quotesRegex, "$1").trim());
+    .map((h) => h.replace(quotesRegex, "$1").trim());
 
-   const header =  headers.map((line) => {
-      return {
-        id: line.toLowerCase().trim(), title: line.toLowerCase().trim()
-      }
-    })
+    headers.push('uuid', 'created_at', 'updated_at')
+  // console.log({headers});
 
+  const header = headers.map((line) => {
+    return {
+      id: line.toLowerCase().trim(),
+      title: line.toLowerCase().trim(),
+    };
+  });
 
- lines.shift();
+  // console.log({header});
 
- let newLines = lines;
+  lines.shift();
+
+  let newLines = lines;
 
   const result = [];
 
@@ -37,25 +43,34 @@ export const cleanUpCSV = async (filePath:string) => {
 
     for (let j = 0; j < headers.length; j++) {
       if (currentline[j]) {
-        obj[headers[j].toLowerCase().trim()] = currentline[j].replace(quotesRegex, "$1");
+        if (obj[headers[j].toLowerCase().trim()] === "uuid") {
+          obj[headers[j].toLowerCase().trim()] = currentline[j].replace(
+            quotesRegex,
+            "Wadeda"
+          )
+        }
+        obj[headers[j].toLowerCase().trim()] = currentline[j].replace(
+          quotesRegex,
+          "$1"
+        );
       }
     }
 
     result.push(obj);
-
   }
 
   return writeToCsv(header, result);
 };
 
-export const writeToCsv = async (header:any, data:any) => {
+export const writeToCsv = async (header: any, data: any) => {
   const csvWriter = createObjectCsvWriter({
-    path: "./src/data/date.csv",
+    path: `${__dirname}/newfile.tsv`,
     header,
-  });;
+  });
 
   csvWriter
     .writeRecords(data)
-    .then(() => logger.info({message: "The CSV file was written successfully"}));
-
+    .then(() =>
+      logger.info({ message: "The CSV file was written successfully" })
+    );
 };

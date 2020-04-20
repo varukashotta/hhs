@@ -19,7 +19,15 @@ const start = Date.now();
 
     const stream =  await client.query(copyFrom.from("COPY wadeda FROM STDIN"));
 
-    const fileStream = fs.createReadStream("test-sync.csv");
+    const fileStream = fs.createReadStream(`world.csv`);
+
+    stream.on('error', (e) => console.log(e));
+
+    fileStream.on('error', (e) => console.log(e))
+
+    stream.on('end', (e: any) => console.log('finito la  musica', e));
+
+    fileStream.on('close', (e: any) => console.log('pasala la fest', e))
 
     await fileStream.pipe(stream);
 
