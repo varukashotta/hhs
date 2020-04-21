@@ -43,7 +43,7 @@ export const sendToDB = async () => {
       fileStream.on("close", () => {
         fs.unlink(`${__dirname}/../data/dbImport.csv`, (err) => {
           if (err) throw err;
-          console.log("successfully deleted");
+          logger.info("successfully deleted");
         });
 
         resolve(`pasala la fest ${millisecondsToMinutesAndSeconds(time)}`);
