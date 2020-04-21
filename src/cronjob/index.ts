@@ -131,28 +131,49 @@ export const convertCSVtoTSV = () => {
 };
 
 const unleashDragon = async () => {
-  // return new Promise(async (resolve, reject) => {
-  //   try {
-  //     result = await gitHub();
-  //     const { lastCommittedTime } = result;
-  //     if (lastCommittedTime) {
-  //       const files = await checkIfMatchingCSVExists();
-  //       resolve(files);
-  //     } else {
-  //       logger.error("Error retrieving data from github!");
-  //       reject(new Error("Error retrieving data from github!"));
-  //     }
-  //   } catch (e) {
-  //     logger.error(e);
-  //     reject(e);
-  //   }
-  // });
+  return new Promise(async (resolve, reject) => {
+    try {
+      result = await gitHub();
+      const { lastCommittedTime } = result;
+      if (lastCommittedTime) {
+        const files = await checkIfMatchingCSVExists();
+        resolve(files);
+      } else {
+        logger.error("Error retrieving data from github!");
+        reject(new Error("Error retrieving data from github!"));
+      }
+    } catch (e) {
+      logger.error(e);
+      reject(e);
+    }
+  });
 
   // const file: any = await readLocalFile("../csvProcessor/albert.csv");
 
+  // let arra: [];
+
+  // arra = file.split("\n");
+
+  // arra.pop();
+
+  // arra.shift();
+
+  // console.log(arra);
+
+  // let csv:string = "";
+
+  // arra.map((arr) => {
+  //   console.log(arr);
+  //   csv += arr + "\n"
+  // })
+
+
+
+  // // console.log(arra);
+
   // // let news = file.replace(/"""/g, '#');
 
-  // let news = file.replace(/,/g, '\t');
+  // let news = csv.replace(/,/g, '\t');
 
   // // news = file.replace(/,/g, "\t");
 
@@ -164,7 +185,7 @@ const unleashDragon = async () => {
 
   // fs.writeFileSync("test.csv", r, "utf8");
 
-  await sendToDB();
+  // // await sendToDB();
 
   // return "String";
 };

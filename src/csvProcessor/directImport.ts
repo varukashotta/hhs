@@ -49,11 +49,16 @@ export const cleanUpCSV = async (filePath: string) => {
         currentline[j] = new Date().toISOString();
       }
       if (currentline[j]) {
-        obj[headers[j].toLowerCase().trim()] = currentline[j].replace(quotesRegex, "$1").trim();
+        obj[headers[j].toLowerCase().trim()] = currentline[j]
+          .replace(quotesRegex, "$1")
+          .trim();
       }
     }
 
-    result.push(obj);
+    if (obj.country_region !== ""|| obj.country_region != "country_region") {
+      console.log(obj.country_region)
+      result.push(obj);
+    }
   }
 
   return writeToCsv(header, result);
