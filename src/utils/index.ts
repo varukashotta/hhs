@@ -36,7 +36,7 @@ export const csvToJson = (csv: string) => {
       }
     }
 
-    if(Object.keys(obj).length !== 0 && obj.constructor == Object){
+    if(Object.keys(obj).length !== 0 && obj.constructor === Object){
       final += '{"index":{}}' + "\n" + JSON.stringify(obj) + "\n" ;
     }
     // result.push({"index":{}})

@@ -40,8 +40,8 @@ const checkIfMatchingCSVExists = async (): Promise<any> => {
       if (fileFound && fileFound.length > 0) {
         resolve("fileFound");
       } else {
-        const toast = await getFileFromServer();
-        resolve(toast);
+        const gitHubResponse = await getFileFromServer();
+        resolve(gitHubResponse);
       }
     } catch (e) {
       reject(e);
@@ -49,7 +49,7 @@ const checkIfMatchingCSVExists = async (): Promise<any> => {
   });
 };
 
-// TODO: Make temp folder, store scv, process  , save to DB , create matching csvs
+// TODO: Make temp folder, store scv, process  , save to DB , create matching csv
 export const getFileFromServer = async () => {
   const { fileName } = result;
   const csvFileDate = moment(fileName).format("MM-DD-YYYY");
@@ -60,6 +60,7 @@ export const getFileFromServer = async () => {
       const saveFile = await writeToFile(resp);
       resolve(saveFile);
     } catch (e) {
+      console.log(e);
       reject(new Error("Could not write csv to file!"));
     }
   });
@@ -86,48 +87,62 @@ export const writeToFile = async (data: any) => {
 export const checkCSVDates = async () => {
   const { fileName } = result;
   return new Promise(async (resolve, reject) => {
-    let files: string[] = await listCSVDirectory();
-    // console.log(files, result);
-
-    cleanUpCSV(files[0]);
-
-    //Create new records and delete existing file
-    resolve("Create");
+    const files: string[] = await listCSVDirectory();
 
     if (files[0].includes(fileName) && files.length > 1) {
-      //Compare the csv files and update existinxg records
+      // Compare the csv files and update existinxg records
       resolve("Compare");
     } else {
       const file = files.filter((csvFile) => csvFile.includes(fileName));
 
-      cleanUpCSV(file[0]);
+      await cleanUpCSV(file[0]);
 
-      //Create new records and delete existing file
-      resolve("Create");
+      const finalProcess = await convertCSVtoTSVImportToDB();
+
+      // Create new records and delete existing file
+      resolve(finalProcess);
     }
   });
 };
 
-export const prepareCSv = async () => {
+export const convertCSVtoTSVImportToDB = async () => {
   return new Promise(async (resolve, reject) => {
     try {
-      let tsv = await convertCSVtoTSV();
-    } catch (e) {
-      reject(new Error("Error converting csv to tsv for database import!"));
+      const file: any = await readLocalFile(`../data/dbImport.csv`);
+
+      let array: string[];
+
+      array = file.split("\n");
+
+      array.pop();
+
+      let csv: string = "";
+
+      array.map((arr) => {
+        if (arr.indexOf("confirmed") === -1) {
+          csv += arr + "\n";
+        }
+      });
+
+      let cleanedCSV = csv.replace(/,/g, "\t");
+
+      cleanedCSV = cleanedCSV.replace(/"[^"]+"/g, (v: string) => {
+        return v.replace(/\t/g, ",");
+      });
+
+      fs.writeFileSync(
+        `${__dirname}/../data/dbImport.csv`,
+        cleanedCSV,
+        "utf8"
+      );
+
+      const DBSaveResult = await sendToDB();
+
+      resolve(DBSaveResult);
+    } catch (error) {
+      reject(error);
     }
   });
-};
-
-export const convertCSVtoTSV = () => {
-  // const file: any = await readLocalFile(
-  //   "../data/1587139200000-2020-04-19T02:00:27Z.csv"
-  // );
-  // let news = file.replace(/,/g, "\t");
-  // var r = news.replace(/"[^"]+"/g, function(v: string) {
-  //   return v.replace(/\t/g, ",");
-  // });
-  // console.log(r);
-  // fs.writeFileSync('test.csv', r, 'utf8');
 };
 
 const unleashDragon = async () => {
@@ -147,47 +162,6 @@ const unleashDragon = async () => {
       reject(e);
     }
   });
-
-  // const file: any = await readLocalFile("../csvProcessor/albert.csv");
-
-  // let arra: [];
-
-  // arra = file.split("\n");
-
-  // arra.pop();
-
-  // arra.shift();
-
-  // console.log(arra);
-
-  // let csv:string = "";
-
-  // arra.map((arr) => {
-  //   console.log(arr);
-  //   csv += arr + "\n"
-  // })
-
-
-
-  // // console.log(arra);
-
-  // // let news = file.replace(/"""/g, '#');
-
-  // let news = csv.replace(/,/g, '\t');
-
-  // // news = file.replace(/,/g, "\t");
-
-  // var r = news.replace(/"[^"]+"/g, function(v: string) {
-  //   return v.replace(/\t/g, ",");
-  // });
-
-  // // console.log(r);
-
-  // fs.writeFileSync("test.csv", r, "utf8");
-
-  // // await sendToDB();
-
-  // return "String";
 };
 
 export default unleashDragon;

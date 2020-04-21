@@ -2,43 +2,56 @@ import pg, { Pool, Client } from "pg";
 import copyFrom from "pg-copy-streams";
 import fs from "fs";
 import dotenv from "dotenv";
-import { millisecondsToMinutesAndSeconds } from '../datasources/utils';
+import { millisecondsToMinutesAndSeconds } from "../datasources/utils";
+import { logger } from "../log/index";
 pg.defaults.ssl = true;
 
 dotenv.config();
 
-
 const connectionString = `${process.env.DB_URL}`;
 
 export const sendToDB = async () => {
-const start = Date.now();
-  try {
-    const client = new Client({ connectionString, ssl: { rejectUnauthorized: false } });
+  return new Promise(async (resolve, reject) => {
+    try {
+      const start = Date.now();
 
-    await client.connect()
+      const client = new Client({
+        connectionString,
+        ssl: { rejectUnauthorized: false },
+      });
 
-    const stream =  await client.query(copyFrom.from("COPY wadeda FROM STDIN"));
+      await client.connect();
 
-    const fileStream = fs.createReadStream(`test.csv`);
+      const stream = client.query(copyFrom.from("COPY wadeda FROM STDIN"));
 
-    stream.on('error', (e) => console.log(e));
+      const fileStream = fs.createReadStream(
+        `${__dirname}/../data/dbImport.csv`
+      );
 
-    fileStream.on('error', (e) => console.log(e))
+      stream.on("error", (e: any) => {
+        reject(new Error(`File stream - Stream error, ${e}`));
+      });
 
-    stream.on('end', (e: any) => console.log('finito la  musica', e));
+      fileStream.on("error", (e) => {
+        reject(new Error(`File stream - Stream error, ${e}`));
+      });
 
-    fileStream.on('close', (e: any) => console.log('pasala la fest', e))
+      stream.on("end", () => logger.info("finito la  musica"));
 
-    await fileStream.pipe(stream);
+      const time = Date.now() - start;
 
+      fileStream.on("close", () => {
+        fs.unlink(`${__dirname}/../data/dbImport.csv`, (err) => {
+          if (err) throw err;
+          console.log("successfully deleted");
+        });
 
-  } catch (e) {
-    console.log(e);
-  }
+        resolve(`pasala la fest ${millisecondsToMinutesAndSeconds(time)}`);
+      });
 
-  let time = Date.now() - start;
-
-  console.log(millisecondsToMinutesAndSeconds(time));
-
+      fileStream.pipe(stream);
+    } catch (e) {
+      reject(e);
+    }
+  });
 };
- 
