@@ -19,7 +19,7 @@ const start = Date.now();
 
     const stream =  await client.query(copyFrom.from("COPY wadeda FROM STDIN"));
 
-    const fileStream = fs.createReadStream(`world.csv`);
+    const fileStream = fs.createReadStream(`test.csv`);
 
     stream.on('error', (e) => console.log(e));
 

@@ -5,7 +5,7 @@ import axios from "axios";
 import moment from "moment";
 import { cleanUpCSV } from "../csvProcessor/directImport";
 import { readLocalFile } from "../utils";
-import { sendToDB } from '../csvProcessor/dbImport';
+import { sendToDB } from "../csvProcessor/dbImport";
 
 const csvFolder = `${__dirname}/../data/`;
 
@@ -51,7 +51,7 @@ const checkIfMatchingCSVExists = async (): Promise<any> => {
 
 // TODO: Make temp folder, store scv, process  , save to DB , create matching csvs
 export const getFileFromServer = async () => {
-  const { fileName, lastCommittedTime } = result;
+  const { fileName } = result;
   const csvFileDate = moment(fileName).format("MM-DD-YYYY");
   return new Promise(async (resolve, reject) => {
     let resp: any;
@@ -87,7 +87,12 @@ export const checkCSVDates = async () => {
   const { fileName } = result;
   return new Promise(async (resolve, reject) => {
     let files: string[] = await listCSVDirectory();
-    console.log(files, result);
+    // console.log(files, result);
+
+    cleanUpCSV(files[0]);
+
+    //Create new records and delete existing file
+    resolve("Create");
 
     if (files[0].includes(fileName) && files.length > 1) {
       //Compare the csv files and update existinxg records
@@ -114,42 +119,52 @@ export const prepareCSv = async () => {
 };
 
 export const convertCSVtoTSV = () => {
-    // const file: any = await readLocalFile(
+  // const file: any = await readLocalFile(
   //   "../data/1587139200000-2020-04-19T02:00:27Z.csv"
   // );
-
   // let news = file.replace(/,/g, "\t");
+  // var r = news.replace(/"[^"]+"/g, function(v: string) {
+  //   return v.replace(/\t/g, ",");
+  // });
+  // console.log(r);
+  // fs.writeFileSync('test.csv', r, 'utf8');
+};
+
+const unleashDragon = async () => {
+  // return new Promise(async (resolve, reject) => {
+  //   try {
+  //     result = await gitHub();
+  //     const { lastCommittedTime } = result;
+  //     if (lastCommittedTime) {
+  //       const files = await checkIfMatchingCSVExists();
+  //       resolve(files);
+  //     } else {
+  //       logger.error("Error retrieving data from github!");
+  //       reject(new Error("Error retrieving data from github!"));
+  //     }
+  //   } catch (e) {
+  //     logger.error(e);
+  //     reject(e);
+  //   }
+  // });
+
+  // const file: any = await readLocalFile("../csvProcessor/albert.csv");
+
+  // // let news = file.replace(/"""/g, '#');
+
+  // let news = file.replace(/,/g, '\t');
+
+  // // news = file.replace(/,/g, "\t");
 
   // var r = news.replace(/"[^"]+"/g, function(v: string) {
   //   return v.replace(/\t/g, ",");
   // });
 
-  // console.log(r);
+  // // console.log(r);
 
-  // fs.writeFileSync('test.csv', r, 'utf8');
-};
+  // fs.writeFileSync("test.csv", r, "utf8");
 
-const unleashDragon = async () => {
-  return new Promise(async (resolve, reject) => {
-    try {
-      result = await gitHub();
-      const { lastCommittedTime } = result;
-      if (lastCommittedTime) {
-        const files = await checkIfMatchingCSVExists();
-        resolve(files);
-      } else {
-        logger.error("Error retrieving data from github!");
-        reject(new Error("Error retrieving data from github!"));
-      }
-    } catch (e) {
-      logger.error(e);
-      reject(e);
-    }
-  });
-
-
-
-  // await sendToDB();
+  await sendToDB();
 
   // return "String";
 };
