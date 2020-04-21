@@ -38,7 +38,7 @@ const checkIfMatchingCSVExists = async (): Promise<any> => {
         filesStored &&
         filesStored.filter((file: any) => file.includes(lastCommittedTime));
       if (fileFound && fileFound.length > 0) {
-        resolve("fileFound");
+        resolve("Nothing to update, records have not changed!");
       } else {
         const gitHubResponse = await getFileFromServer();
         resolve(gitHubResponse);
@@ -60,8 +60,7 @@ export const getFileFromServer = async () => {
       const saveFile = await writeToFile(resp);
       resolve(saveFile);
     } catch (e) {
-      console.log(e);
-      reject(new Error("Could not write csv to file!"));
+      reject(new Error(`${e}`));
     }
   });
 };
@@ -130,11 +129,7 @@ export const convertCSVtoTSVImportToDB = async () => {
         return v.replace(/\t/g, ",");
       });
 
-      fs.writeFileSync(
-        `${__dirname}/../data/dbImport.csv`,
-        cleanedCSV,
-        "utf8"
-      );
+      fs.writeFileSync(`${__dirname}/../data/dbImport.csv`, cleanedCSV, "utf8");
 
       const DBSaveResult = await sendToDB();
 
@@ -154,7 +149,6 @@ const unleashDragon = async () => {
         const files = await checkIfMatchingCSVExists();
         resolve(files);
       } else {
-        logger.error("Error retrieving data from github!");
         reject(new Error("Error retrieving data from github!"));
       }
     } catch (e) {

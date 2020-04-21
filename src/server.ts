@@ -1,11 +1,11 @@
-// tslint:disable-next-line: no-var-requires
-// require("elastic-apm-node").start({
-//   serviceName: "hhs",
-//   environment: `${process.env.NODE_ENV}`,
-//   secretToken: "0gcOqtwZe2LBLhFWuA",
-//   serverUrl:
-//     "https://5937c8a340f749e8b814d3753ae70cd2.apm.ap-southeast-2.aws.cloud.es.io:443",
-// });
+//tslint:disable-next-line: no-var-requires
+require("elastic-apm-node").start({
+  serviceName: "hhs",
+  environment: `${process.env.NODE_ENV}`,
+  secretToken: "0gcOqtwZe2LBLhFWuA",
+  serverUrl:
+    "https://5937c8a340f749e8b814d3753ae70cd2.apm.ap-southeast-2.aws.cloud.es.io:443",
+});
 
 // tslint:disable-next-line: no-var-requires
 const EventEmitter = require("events");
@@ -35,9 +35,6 @@ const typeDefs = gql`
     description: String
   }
 
-  # The "Query" type is special: it lists all of the available queries that
-  # clients can execute, along with the return type for each. In this
-  # case, the "books" query returns an array of zero or more Books (defined above).
   type Query {
     youtube: [Info]
     reddit: [Info]
@@ -47,8 +44,6 @@ const typeDefs = gql`
   }
 `;
 
-// Resolvers define the technique for fetching the types defined in the
-// schema. This resolver retrieves books from the "books" array above.
 const resolvers = {
   Query: {
     youtube: async (_source: any, { id }: any, { dataSources }: any) => {
