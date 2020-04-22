@@ -104,6 +104,30 @@ export const checkCSVDates = async () => {
   });
 };
 
+export const compareCSVFiles = async () => {
+  return new Promise((resolve, reject) => {
+    const oldCSV = fs.readFileSync(
+      `${__dirname}/data/1587312000000-2020-04-20T23:50:01Z.csv`
+    );
+
+    const newCSV = fs.readFileSync(`${__dirname}/data/test.csv`);
+
+    const array1 = String(oldCSV).split("\n");
+
+    const array2 = String(newCSV).split("\n");
+
+    const result: any = [];
+
+    result.push(array1[0]);
+
+    for (let i = 0; i < array1.length; i++) {
+      const diff = array1[i] === array2[i];
+      if (!diff) result.push(array2[i]);
+    }
+    resolve(result);
+  });
+};
+
 export const convertCSVtoTSVImportToDB = async () => {
   return new Promise(async (resolve, reject) => {
     try {
