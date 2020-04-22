@@ -89,8 +89,10 @@ export const checkCSVDates = async () => {
     const files: string[] = await listCSVDirectory();
 
     if (files[0].includes(fileName) && files.length > 1) {
-      // Compare the csv files and update existinxg records
-      resolve("Compare");
+      // Compare the csv files
+      const comparison = await compareCSVFiles();
+
+      resolve(comparison);
     } else {
       const file = files.filter((csvFile) => csvFile.includes(fileName));
 
@@ -105,26 +107,70 @@ export const checkCSVDates = async () => {
 };
 
 export const compareCSVFiles = async () => {
-  return new Promise((resolve, reject) => {
-    const oldCSV = fs.readFileSync(
-      `${__dirname}/data/1587312000000-2020-04-20T23:50:01Z.csv`
-    );
+  return new Promise(async (resolve, reject) => {
+    const { lastCommittedTime } = result;
+    try {
+      const files = await listCSVDirectory();
 
-    const newCSV = fs.readFileSync(`${__dirname}/data/test.csv`);
+      let existingCSV: string = "";
+      let latestCSV: string = "";
 
-    const array1 = String(oldCSV).split("\n");
+      files.map((file) => {
+        if (file.includes(lastCommittedTime)) {
+          latestCSV = file;
+        } else {
+          existingCSV = file;
+        }
+      });
 
-    const array2 = String(newCSV).split("\n");
+      if (
+        (existingCSV && existingCSV !== "") ||
+        (latestCSV && latestCSV !== "")
+      ) {
+        const createdComparisonArray = await createCSVUpdateFile({
+          existingCSV,
+          latestCSV,
+        });
 
-    const result: any = [];
-
-    result.push(array1[0]);
-
-    for (let i = 0; i < array1.length; i++) {
-      const diff = array1[i] === array2[i];
-      if (!diff) result.push(array2[i]);
+        resolve(createdComparisonArray);
+      } else {
+        reject(new Error("No files found to compare!"));
+      }
+    } catch (error) {
+      reject(error);
     }
-    resolve(result);
+  });
+};
+
+export const createCSVUpdateFile = async ({
+  existingCSV,
+  latestCSV,
+}: {
+  existingCSV: string;
+  latestCSV: string;
+}) => {
+  return new Promise((resolve, reject) => {
+    try {
+      const oldCSV = fs.readFileSync(`${__dirname}/data/${existingCSV}`);
+
+      const newCSV = fs.readFileSync(`${__dirname}/data/${latestCSV}`);
+
+      const array1 = String(oldCSV).split("\n");
+
+      const array2 = String(newCSV).split("\n");
+
+      const result: any = [];
+
+      result.push(array1[0]);
+
+      for (let i = 0; i < array1.length; i++) {
+        const diff = array1[i] === array2[i];
+        if (!diff) result.push(array2[i]);
+      }
+      resolve(result);
+    } catch (error) {
+      reject(error);
+    }
   });
 };
 
