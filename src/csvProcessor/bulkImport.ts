@@ -29,7 +29,7 @@ export const sendToDB = async () => {
       );
 
       stream.on("error", (e: any) => {
-        reject(new Error(`File stream - Stream error, ${e}`));
+        reject(new Error(`Stream error, ${e}`));
       });
 
       fileStream.on("error", (e) => {

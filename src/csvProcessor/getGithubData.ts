@@ -1,6 +1,6 @@
 import { GraphQLClient } from "graphql-request";
 import { logger } from "../log/index";
-import { lastUpdateQuery, foldersQuery } from "./files";
+import { lastUpdateQuery, foldersQuery } from "./gitHubQueries";
 import moment from "moment";
 
 const gitHubAPI: GraphQLClient = new GraphQLClient(

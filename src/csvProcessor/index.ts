@@ -35,7 +35,7 @@ const addRowsToDB = (rows: any) => {
 
 export const getCSV = async () => {
   try {
-    const result: string | void = await readLocalFile("../data/04-02-2020.csv");
+    const result: string | void = await readLocalFile("./temp.csv");
 
     const convertedResult = csvToJson(String(result));
 

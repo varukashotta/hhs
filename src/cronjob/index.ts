@@ -1,11 +1,11 @@
-import { gitHub } from "../csvProcessor/getData";
+import { gitHub } from "../csvProcessor/getGithubData";
 import { logger } from "../log";
 import fs from "fs";
 import axios from "axios";
 import moment from "moment";
-import { cleanUpCSV } from "../csvProcessor/directImport";
+import { cleanUpCSV } from "../csvProcessor/csvCleanerForBulkImport";
 import { readLocalFile } from "../utils";
-import { sendToDB } from "../csvProcessor/dbImport";
+import { sendToDB } from "../csvProcessor/bulkImport";
 
 const csvFolder = `${__dirname}/../data/`;
 
