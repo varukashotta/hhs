@@ -6,6 +6,7 @@ import moment from "moment";
 import { cleanUpCSV } from "../csvProcessor/csvCleanerForBulkImport";
 import { readLocalFile } from "../utils";
 import { sendToDB } from "../csvProcessor/bulkImport";
+import { startManualImport } from "../csvProcessor/manualImport";
 
 const csvFolder = `${__dirname}/../data/`;
 
@@ -23,8 +24,8 @@ const listCSVDirectory = (): Promise<string[]> => {
     try {
       const files: string[] = await fs.readdirSync(csvFolder);
       resolve(files);
-    } catch (e) {
-      reject(e);
+    } catch (error) {
+      reject(new Error(error));
     }
   });
 };
@@ -43,8 +44,8 @@ const checkIfMatchingCSVExists = async (): Promise<any> => {
         const gitHubResponse = await getFileFromServer();
         resolve(gitHubResponse);
       }
-    } catch (e) {
-      reject(e);
+    } catch (error) {
+      reject(new Error(error));
     }
   });
 };
@@ -59,8 +60,8 @@ export const getFileFromServer = async () => {
       resp = await axios.get(`${COVID_CSV_REPO + csvFileDate}.csv`);
       const saveFile = await writeToFile(resp);
       resolve(saveFile);
-    } catch (e) {
-      reject(new Error(`${e}`));
+    } catch (error) {
+      reject(new Error(error));
     }
   });
 };
@@ -71,14 +72,14 @@ export const writeToFile = async (data: any) => {
   return new Promise(async (resolve, reject) => {
     try {
       const writingFile = await fs.writeFileSync(
-        `${__dirname}/../data/${fileName}-${lastCommittedTime}.csv`,
+        `${csvFolder}${fileName}-${lastCommittedTime}.csv`,
         String(data.data)
       );
 
       const comparedCSV = await checkCSVDates();
       resolve(comparedCSV);
     } catch (error) {
-      reject(error);
+      reject(new Error(error));
     }
   });
 };
@@ -137,7 +138,7 @@ export const compareCSVFiles = async () => {
         reject(new Error("No files found to compare!"));
       }
     } catch (error) {
-      reject(error);
+      reject(new Error(error));
     }
   });
 };
@@ -149,7 +150,7 @@ export const createCSVUpdateFile = async ({
   existingCSV: string;
   latestCSV: string;
 }) => {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     try {
       const oldCSV = fs.readFileSync(`${__dirname}/data/${existingCSV}`);
 
@@ -159,17 +160,33 @@ export const createCSVUpdateFile = async ({
 
       const array2 = String(newCSV).split("\n");
 
-      const result: any = [];
+      const newCSVArray: any = [];
 
-      result.push(array1[0]);
+      newCSVArray.push(array1[0]);
 
       for (let i = 0; i < array1.length; i++) {
         const diff = array1[i] === array2[i];
-        if (!diff) result.push(array2[i]);
+        if (!diff) newCSVArray.push(array2[i]);
       }
-      resolve(result);
+
+      const tempFileWritten = await writeTempCSVFile(newCSVArray);
+
+      resolve(tempFileWritten);
     } catch (error) {
-      reject(error);
+      reject(new Error(error));
+    }
+  });
+};
+
+export const writeTempCSVFile = (data: any) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      await fs.writeFileSync(`${__dirname}/temp/temp.csv`, data, "utf8");
+
+      resolve("File written");
+      // await startManualImport();
+    } catch (error) {
+      reject(new Error(error));
     }
   });
 };
@@ -199,13 +216,13 @@ export const convertCSVtoTSVImportToDB = async () => {
         return v.replace(/\t/g, ",");
       });
 
-      fs.writeFileSync(`${__dirname}/../data/dbImport.csv`, cleanedCSV, "utf8");
+      fs.writeFileSync(`${csvFolder}dbImport.csv`, cleanedCSV, "utf8");
 
       const DBSaveResult = await sendToDB();
 
       resolve(DBSaveResult);
     } catch (error) {
-      reject(error);
+      reject(new Error(error));
     }
   });
 };
@@ -221,9 +238,8 @@ const unleashDragon = async () => {
       } else {
         reject(new Error("Error retrieving data from github!"));
       }
-    } catch (e) {
-      logger.error(e);
-      reject(e);
+    } catch (error) {
+      reject(new Error(error));
     }
   });
 };

@@ -33,28 +33,34 @@ const addRowsToDB = (rows: any) => {
   })();
 };
 
-export const getCSV = async () => {
-  try {
-    const result: string | void = await readLocalFile("./temp.csv");
+export const startManualImport = async () => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const result: string | void = await readLocalFile("./temp.csv");
 
-    const convertedResult = csvToJson(String(result));
+      const convertedResult = csvToJson(String(result));
 
-    console.log(convertedResult);
+      console.log(convertedResult);
 
-    // addRowsToDB(convertedResult);
-  } catch (error) {
-    // handle error
-    return error;
-  }
+      resolve("About to update records to database manually");
+
+      // addRowsToDB(convertedResult);
+    } catch (error) {
+      reject(new Error(error));
+    }
+  });
 };
 
-export const addCountryToDB = async (params: any) => {
-  try {
-    const result = await graphqlClient.request(saveRow, params);
-    return result;
-  } catch (e) {
-    logger.error(e);
-  }
+export const addCountryToDB = async (params: any): Promise<any> => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const result = await graphqlClient.request(saveRow, params);
+      console.log(result);
+      resolve("Finished Updating database");
+    } catch (e) {
+      reject(new Error(e));
+    }
+  });
 };
 
 async function runShow(rows: any) {
@@ -63,8 +69,6 @@ async function runShow(rows: any) {
 
   for (const row of rows) {
     i++;
-
-    const loopStart = new Date().getTime();
 
     if (row.Country_Region) {
       try {
@@ -121,15 +125,17 @@ async function runShow(rows: any) {
                 addedRowResult.insert_recorded.returning[0]
               );
 
-
               // logger.info({ updatedRecord });
 
               console.log({ updatedRecord });
 
-
               resolve(true);
             } else {
-              reject(new Error(`Could not add ${addedRowResult.insert_recorded.returning[0].id} to search queue`));
+              reject(
+                new Error(
+                  `Could not add ${addedRowResult.insert_recorded.returning[0].id} to search queue`
+                )
+              );
             }
           });
         }
@@ -137,13 +143,6 @@ async function runShow(rows: any) {
         logger.error(e);
       }
     }
-    logger.info({ message: i });
-    const end = new Date().getTime();
-    const time = end - start;
-    const loopTime = end - loopStart;
-
-    logger.info("Loop Execution time: " + millisecondsToMinutesAndSeconds(loopTime));
-    logger.info("Execution time: " + millisecondsToMinutesAndSeconds(time));
   }
   const end = new Date().getTime();
   const time = end - start;
