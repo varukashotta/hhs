@@ -23,7 +23,7 @@ export const gitHub = async (): Promise<{
       try {
         connection = await gitHubAPI.request(foldersQuery);
       } catch (e) {
-        reject(new Error("Cannot connect to github"));
+        reject(new Error(e));
       }
     };
 
@@ -75,11 +75,10 @@ export const gitHub = async (): Promise<{
           reject(new Error("No file details found!"));
         }
       } else {
-        reject("Connection Error!");
+        reject(new Error("Connection Error!"));
       }
     } catch (e) {
-      logger.error(e);
-      reject(e);
+      reject(new Error(e));
     }
   });
 };
@@ -95,7 +94,7 @@ export const getLastCommitTime = async (date: Date) => {
         const result = await gitHubAPI.request(lastUpdateQuery, { path });
         resolve(result);
       } catch (e) {
-        reject(e);
+        reject(new Error(e));
       }
     } else {
       reject("We need a date parameter!");

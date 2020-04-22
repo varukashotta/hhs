@@ -22,7 +22,7 @@ let result: IProps;
 const listCSVDirectory = (): Promise<string[]> => {
   return new Promise(async (resolve, reject) => {
     try {
-      const files: string[] = await fs.readdirSync(csvFolder);
+      const files: string[] = fs.readdirSync(csvFolder);
       resolve(files);
     } catch (error) {
       reject(new Error(error));
@@ -71,7 +71,7 @@ export const writeToFile = async (data: any) => {
 
   return new Promise(async (resolve, reject) => {
     try {
-      const writingFile = await fs.writeFileSync(
+      const writingFile = fs.writeFileSync(
         `${csvFolder}${fileName}-${lastCommittedTime}.csv`,
         String(data.data)
       );
@@ -152,9 +152,9 @@ export const createCSVUpdateFile = async ({
 }) => {
   return new Promise(async (resolve, reject) => {
     try {
-      const oldCSV = fs.readFileSync(`${__dirname}/data/${existingCSV}`);
+      const oldCSV = fs.readFileSync(`${csvFolder}${existingCSV}`);
 
-      const newCSV = fs.readFileSync(`${__dirname}/data/${latestCSV}`);
+      const newCSV = fs.readFileSync(`${csvFolder}${latestCSV}`);
 
       const array1 = String(oldCSV).split("\n");
 
@@ -169,6 +169,9 @@ export const createCSVUpdateFile = async ({
         if (!diff) newCSVArray.push(array2[i]);
       }
 
+      // remove existing csv file
+      fs.unlinkSync(`${csvFolder}${existingCSV}`);
+
       const tempFileWritten = await writeTempCSVFile(newCSVArray);
 
       resolve(tempFileWritten);
@@ -178,15 +181,30 @@ export const createCSVUpdateFile = async ({
   });
 };
 
-export const writeTempCSVFile = (data: any) => {
+export const writeTempCSVFile = async (data: any) => {
   return new Promise(async (resolve, reject) => {
     try {
-      await fs.writeFileSync(`${__dirname}/temp/temp.csv`, data, "utf8");
+      let csv = "";
 
-      resolve("File written");
+      data.map((line: string) => (csv += line + "\n"));
+
+      const dir = `${__dirname}/../tmp`;
+
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir);
+      }
+
+      const tempFile = fs.writeFileSync(
+        `${__dirname}/../tmp/temp.csv`,
+        csv,
+        "utf8"
+      );
+
+      resolve("fileWritten now invoke manual updates");
+
       // await startManualImport();
     } catch (error) {
-      reject(new Error(error));
+      reject(error);
     }
   });
 };
@@ -194,7 +212,7 @@ export const writeTempCSVFile = (data: any) => {
 export const convertCSVtoTSVImportToDB = async () => {
   return new Promise(async (resolve, reject) => {
     try {
-      const file: any = await readLocalFile(`../data/dbImport.csv`);
+      const file: any = readLocalFile(`../data/dbImport.csv`);
 
       let array: string[];
 
