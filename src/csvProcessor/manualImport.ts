@@ -6,8 +6,8 @@ import { millisecondsToMinutesAndSeconds } from "../datasources/utils";
 import { logger } from "../log";
 
 const saveRow = `
-  mutation MyMutation($combined_key: String!, $last_update: date!, $active: Int!, $deaths: Int!, $last_update: date!, $confirmed: Int!, $recovered: Int!) {
-    update_wadedafinal(where: {combined_key: {_eq: $combined_key}, last_update: {_eq: $last_update}}, _set: {active: $active, deaths: $deaths, last_update: $last_update, confirmed: $confirmed, recovered: $recovered}) {
+  mutation MyMutation($combinedKey: String!, $lastUpdatedKey: timestamptz!, $lastUpdated: timestamptz!, $active: Int!, $deaths: Int!, $confirmed: Int!, $recovered: Int!) {
+    update_wadedafinal(where: {combined_key: {_eq: $combinedKey}, last_update: {_eq: $lastUpdatedKey}}, _set: {active: $active, deaths: $deaths, last_update: $lastUpdated, confirmed: $confirmed, recovered: $recovered}) {
       affected_rows
       returning {
         active
@@ -30,24 +30,23 @@ const saveRow = `
   }
   `;
 
-const addRowsToDB = (rows: any) => {
-  (async () => {
-    await runShow(rows);
-  })();
-};
-
-export const startManualImport = async () => {
+export const startManualImport = async (lastUpdatedCSVDateTime:string) => {
   return new Promise(async (resolve, reject) => {
     try {
-      const result: string | void = await readLocalFile(`${__dirname}/../tmp/temp.csv`);
+      const result: string | void = readLocalFile(`../tmp/temp.csv`);
+
+      const numberOfRows = String(result).split("\n");
+
+      if(numberOfRows.length > 1){
 
       const convertedResult = csvToJson(String(result));
 
-      console.log(convertedResult);
+      const updateResult = updateDatabase(convertedResult, lastUpdatedCSVDateTime);
 
-      resolve("About to update records to database manually");
-
-      // addRowsToDB(convertedResult);
+      resolve(updateResult);
+      } else {
+        reject(new Error('Nothing to update!'));
+      }
     } catch (error) {
       reject(new Error(error));
     }
@@ -58,96 +57,82 @@ export const addCountryToDB = async (params: any): Promise<any> => {
   return new Promise(async (resolve, reject) => {
     try {
       const result = await graphqlClient.request(saveRow, params);
-      console.log(result);
-      resolve("Finished Updating database");
+
+      // const addedToSearchQueue = await updateItemInSearch(result);
+
+      resolve(JSON.stringify(result));
     } catch (e) {
       reject(new Error(e));
     }
   });
 };
 
-async function runShow(rows: any) {
-  const start = new Date().getTime();
-  let i = 0;
+export const updateDatabase = async (rows: any, lastUpdatedCSVDateTime:string) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      resolve('Here now!')
+      for (const row of rows) {
+        if (row.Country_Region) {
+          const {
+            Deaths,
+            Confirmed,
+            Active,
+            Combined_Key,
+            Last_Update,
+            Recovered,
+          } = row;
+          const input = {
+            // tslint:disable-next-line: radix
+            deaths: parseInt(Deaths) || 0,
+            // tslint:disable-next-line: radix
+            recovered: parseInt(Recovered) ? parseInt(Recovered) : 0,
+            // tslint:disable-next-line: radix
+            active: parseInt(Active) || 0,
+            // tslint:disable-next-line: radix
+            confirmed: parseInt(Confirmed) ? parseInt(Confirmed) : 0,
+            combinedKey: Combined_Key || "",
+            lastUpdated: moment(new Date(Last_Update)).format(),
 
-  for (const row of rows) {
-    i++;
+            lastUpdatedKey: lastUpdatedCSVDateTime
+            // tslint:disable-next-line: radix
+          };
+          const addedRowResult = await addCountryToDB(input);
 
-    if (row.Country_Region) {
+          resolve(addedRowResult);
+        }
+      }
+    } catch (error) {
+      reject(new Error(error));
+    }
+  });
+};
+
+export const updateItemInSearch = async (addedRowResult: any) => {
+  return new Promise(async (resolve, reject) => {
+    if (addedRowResult && addedRowResult.insert_recorded.returning.length > 0) {
       try {
         const {
-          Province_State,
-          Lat,
-          Long_,
-          Country_Region,
-          Admin2,
-          Deaths,
-          Confirmed,
-          Active,
-          Combined_Key,
-          Last_Update,
-          FIPS,
-          Recovered,
-        } = row;
-        const input = {
-          countryRegion: Country_Region,
-          admin: Admin2 || "",
-          provinceState: Province_State || "",
-          coordinates: `${Lat || 0}, ${Long_ || 0}`,
-          // tslint:disable-next-line: radix
-          deaths: parseInt(Deaths) || 0,
-          // tslint:disable-next-line: radix
-          recovered: parseInt(Recovered) ? parseInt(Recovered) : 0,
-          // tslint:disable-next-line: radix
-          active: parseInt(Active) || 0,
-          // tslint:disable-next-line: radix
-          confirmed: parseInt(Confirmed) ? parseInt(Confirmed) : 0,
-          combinedKey: Combined_Key || "",
-          lastUpdated: moment(new Date(Last_Update)).format(),
-          // tslint:disable-next-line: radix
-          fips: parseInt(FIPS) ? parseInt(FIPS) : 0,
-        };
-        const addedRowResult = await addCountryToDB(input);
+          last_updated,
+          combined_key,
+        } = addedRowResult.insert_recorded.returning[0];
 
-        logger.info(addedRowResult.insert_recorded.returning[0].id);
+        const updatedRecord = await searchDoc(
+          last_updated,
+          combined_key,
+          addedRowResult.insert_recorded.returning[0]
+        );
 
-        if (addedRowResult) {
-          await new Promise(async (resolve, reject) => {
-            if (
-              addedRowResult &&
-              addedRowResult.insert_recorded.returning.length > 0
-            ) {
-              const {
-                last_updated,
-                combined_key,
-              } = addedRowResult.insert_recorded.returning[0];
-
-              const updatedRecord = await searchDoc(
-                last_updated,
-                combined_key,
-                addedRowResult.insert_recorded.returning[0]
-              );
-
-              // logger.info({ updatedRecord });
-
-              console.log({ updatedRecord });
-
-              resolve(true);
-            } else {
-              reject(
-                new Error(
-                  `Could not add ${addedRowResult.insert_recorded.returning[0].id} to search queue`
-                )
-              );
-            }
-          });
-        }
-      } catch (e) {
-        logger.error(e);
+        console.log({ updatedRecord });
+        resolve(`Added ${combined_key} record to search queue!`);
+      } catch (error) {
+        reject(new Error(error));
       }
+    } else {
+      reject(
+        new Error(
+          `Could not add ${addedRowResult.insert_recorded.returning[0].id} to search queue`
+        )
+      );
     }
-  }
-  const end = new Date().getTime();
-  const time = end - start;
-  logger.info("Execution time: " + millisecondsToMinutesAndSeconds(time));
-}
+  });
+};

@@ -19,6 +19,8 @@ interface IProps {
 
 let result: IProps;
 
+let lastUpdate: any;
+
 const listCSVDirectory = (): Promise<string[]> => {
   return new Promise(async (resolve, reject) => {
     try {
@@ -158,6 +160,8 @@ export const createCSVUpdateFile = async ({
 
       const array1 = String(oldCSV).split("\n");
 
+      lastUpdate = String(array1[1]).split(",")[4];
+
       const array2 = String(newCSV).split("\n");
 
       const newCSVArray: any = [];
@@ -200,9 +204,9 @@ export const writeTempCSVFile = async (data: any) => {
         "utf8"
       );
 
-      resolve("fileWritten now invoke manual updates");
+      const updatingRecords = await startManualImport(lastUpdate);
 
-      // await startManualImport();
+      resolve(updatingRecords);
     } catch (error) {
       reject(error);
     }

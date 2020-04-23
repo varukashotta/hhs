@@ -42,7 +42,7 @@ export const sendToDB = async () => {
 
       fileStream.on("close", () => {
         fs.unlink(`${__dirname}/../data/dbImport.csv`, (err) => {
-          if (err) throw err;
+          if (err) console.log(err);
           logger.info("successfully deleted");
         });
 
