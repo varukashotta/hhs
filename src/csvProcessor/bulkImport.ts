@@ -22,7 +22,7 @@ export const sendToDB = async () => {
 
       await client.connect();
 
-      const stream = client.query(copyFrom.from("COPY wadeda FROM STDIN"));
+      const stream = client.query(copyFrom.from("COPY wadedafinal FROM STDIN"));
 
       const fileStream = fs.createReadStream(
         `${__dirname}/../data/dbImport.csv`
@@ -55,3 +55,22 @@ export const sendToDB = async () => {
     }
   });
 };
+
+
+// CREATE TABLE public.wadedafinal (
+//   fips character varying(50)  NULL,
+//   admin2 character varying(50)  NULL,
+//   province_state character varying(50)  NULL,
+//   country_region character varying(50)  NULL,
+//   last_update timestamp with time zone  NULL,
+//   lat character varying(50)  NULL,
+//   long_ character varying(50)  NULL,
+//   confirmed integer  NULL,
+//   deaths integer  NULL,
+//   recovered integer  NULL,
+//   active integer  NULL,
+//   combined_key text  NULL,
+//   uuid text  NOT NULL,
+//   created_at timestamp with time zone  NULL,
+//   updated_at timestamp with time zone  NULL
+// );

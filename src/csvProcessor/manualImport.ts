@@ -5,23 +5,26 @@ import { searchDoc } from "../search/elasticsearch";
 import { millisecondsToMinutesAndSeconds } from "../datasources/utils";
 import { logger } from "../log";
 
-const saveRow = `mutation($admin: String!, $active: Int!, $combinedKey: String!, $confirmed: Int!, $coordinates: point!, $countryRegion: String!, $lastUpdated: date!, $deaths: Int!, $fips: Int!, $provinceState: String!, $recovered: Int!){
-    insert_recorded(objects: {admin: $admin, active: $active, combined_key: $combinedKey, confirmed: $confirmed, coordinates: $coordinates,
-        country_region: $countryRegion, last_updated: $lastUpdated, deaths: $deaths, fips: $fips, province_state: $provinceState, recovered: $recovered}, on_conflict: {constraint: recorded_pkey, update_columns: [deaths, active, recovered, confirmed]}) {
+const saveRow = `
+  mutation MyMutation($combined_key: String!, $last_update: date!, $active: Int!, $deaths: Int!, $last_update: date!, $confirmed: Int!, $recovered: Int!) {
+    update_wadedafinal(where: {combined_key: {_eq: $combined_key}, last_update: {_eq: $last_update}}, _set: {active: $active, deaths: $deaths, last_update: $last_update, confirmed: $confirmed, recovered: $recovered}) {
+      affected_rows
       returning {
         active
-        admin
+        admin2
         combined_key
         confirmed
-        coordinates
         country_region
-        deaths
-        last_updated
-        id
-        updated_at
-        province_state
         created_at
+        deaths
+        fips
+        last_update
+        lat
+        long_
+        province_state
         recovered
+        updated_at
+        uuid
       }
     }
   }
@@ -36,7 +39,7 @@ const addRowsToDB = (rows: any) => {
 export const startManualImport = async () => {
   return new Promise(async (resolve, reject) => {
     try {
-      const result: string | void = await readLocalFile("./temp.csv");
+      const result: string | void = await readLocalFile(`${__dirname}/../tmp/temp.csv`);
 
       const convertedResult = csvToJson(String(result));
 
