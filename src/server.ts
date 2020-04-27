@@ -88,7 +88,7 @@ const server = new ApolloServer({
 const router = new Router();
 
 router.get('/auth', (ctx) => {
-  // console.log(ctx);
+   console.log(ctx);
 
   ctx.body = {
     'X-Hasura-Role': 'user',
