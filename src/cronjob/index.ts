@@ -214,7 +214,7 @@ export const writeTempCSVFile = async (data: any) => {
 export const convertCSVtoTSVImportToDB = async () => {
   return new Promise(async (resolve, reject) => {
     try {
-      const file: any = readLocalFile(`../data/dbImport.csv`);
+      const file: any = readLocalFile(`${__dirname}/../data/dbImport.csv`);
 
       let array: string[];
 
