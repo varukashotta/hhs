@@ -8,7 +8,7 @@ import { readLocalFile } from "../utils";
 import { sendToDB } from "../csvProcessor/bulkImport";
 import { startManualImport } from "../csvProcessor/manualImport";
 
-const csvFolder = `../data/`;
+const csvFolder = `${__dirname}/../data/`;
 
 const COVID_CSV_REPO =
   "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/";
