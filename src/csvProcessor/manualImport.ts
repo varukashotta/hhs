@@ -1,13 +1,11 @@
-import { csvToJson, readLocalFile } from "../utils/index";
+import { csvToJson, readLocalFile } from "../utils";
 import graphqlClient from "../utils/GraphQLRequest";
 import moment from "moment";
 import { searchDoc } from "../search/elasticsearch";
-import { millisecondsToMinutesAndSeconds } from "../datasources/utils";
-import { logger } from "../log";
 
 const saveRow = `
-  mutation MyMutation($combinedKey: String!, $lastUpdatedKey: timestamptz!, $lastUpdated: timestamptz!, $active: Int!, $deaths: Int!, $confirmed: Int!, $recovered: Int!) {
-    update_wadedafinal(where: {combined_key: {_eq: $combinedKey}, last_update: {_eq: $lastUpdatedKey}}, _set: {active: $active, deaths: $deaths, last_update: $lastUpdated, confirmed: $confirmed, recovered: $recovered}) {
+  mutation MyMutation($combinedKey: String!, $lastCommitted: String!, $lastUpdated: timestamp!, $active: Int!, $deaths: Int!, $confirmed: Int!, $recovered: Int!) {
+    update_wadedafinal(where: {combined_key: {_like: $combinedKey}, last_commited: {_eq: $lastCommitted}}, _set: {active: $active, deaths: $deaths, last_update: $lastUpdated, confirmed: $confirmed, recovered: $recovered}) {
       affected_rows
       returning {
         active
@@ -30,22 +28,26 @@ const saveRow = `
   }
   `;
 
-export const startManualImport = async (lastUpdatedCSVDateTime:string) => {
+export const startManualImport = async (lastUpdatedCSVDateTime: string) => {
   return new Promise(async (resolve, reject) => {
     try {
       const result: string | void = readLocalFile(`../tmp/temp.csv`);
 
       const numberOfRows = String(result).split("\n");
 
-      if(numberOfRows.length > 1){
+      if (numberOfRows.length > 1) {
+        const convertedResult = csvToJson(String(result));
 
-      const convertedResult = csvToJson(String(result));
+        const updateResult = updateDatabase(
+          convertedResult,
+          lastUpdatedCSVDateTime
+        );
 
-      const updateResult = updateDatabase(convertedResult, lastUpdatedCSVDateTime);
+        console.log(updateResult);
 
-      resolve(updateResult);
+        resolve(updateResult);
       } else {
-        reject(new Error('Nothing to update!'));
+        reject(new Error("Nothing to update!"));
       }
     } catch (error) {
       reject(new Error(error));
@@ -53,24 +55,51 @@ export const startManualImport = async (lastUpdatedCSVDateTime:string) => {
   });
 };
 
-export const addCountryToDB = async (params: any): Promise<any> => {
+const updateLastCommitColumn = `mutation MyMutation($lastCommitted: String!){
+  update_wadedafinal(where: {}, _set: {last_commited: $lastCommitted}) {
+    affected_rows
+  }
+}
+`;
+
+export const updateDateColumn  = async (lastCommitted:string) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const result = await graphqlClient.request(updateLastCommitColumn, {lastCommitted});
+      console.log(result);
+      resolve('result');
+    } catch (e) {
+      reject(new Error(e))
+    }
+  })
+}
+
+export const addCountryToDB = async (params: any, lastUpdatedCSVDateTime: string): Promise<any> => {
   return new Promise(async (resolve, reject) => {
     try {
       const result = await graphqlClient.request(saveRow, params);
 
+      console.log({result, lastUpdatedCSVDateTime });
+
+
       // const addedToSearchQueue = await updateItemInSearch(result);
 
-      resolve(JSON.stringify(result));
+     const updateResult = await updateDateColumn(lastUpdatedCSVDateTime);
+
+      resolve(updateResult);
     } catch (e) {
       reject(new Error(e));
     }
   });
 };
 
-export const updateDatabase = async (rows: any, lastUpdatedCSVDateTime:string) => {
+export const updateDatabase = async (
+  rows: any,
+  lastUpdatedCSVDateTime: string
+) => {
   return new Promise(async (resolve, reject) => {
     try {
-      resolve('Here now!')
+
       for (const row of rows) {
         if (row.Country_Region) {
           const {
@@ -90,13 +119,20 @@ export const updateDatabase = async (rows: any, lastUpdatedCSVDateTime:string) =
             active: parseInt(Active) || 0,
             // tslint:disable-next-line: radix
             confirmed: parseInt(Confirmed) ? parseInt(Confirmed) : 0,
-            combinedKey: Combined_Key || "",
-            lastUpdated: moment(new Date(Last_Update)).format(),
 
-            lastUpdatedKey: lastUpdatedCSVDateTime
+            combinedKey: `%${Combined_Key.replace(/['"]+/g, '')}%` || "",
+
+            lastUpdated: moment(new Date(Last_Update)).utc().format(),
+
+            lastCommitted: moment(new Date(lastUpdatedCSVDateTime)).utc().format(),
             // tslint:disable-next-line: radix
           };
-          const addedRowResult = await addCountryToDB(input);
+
+          console.log({input});
+
+          const addedRowResult = await addCountryToDB(input, moment(new Date(lastUpdatedCSVDateTime)).utc().format());
+
+          console.log({addedRowResult});
 
           resolve(addedRowResult);
         }

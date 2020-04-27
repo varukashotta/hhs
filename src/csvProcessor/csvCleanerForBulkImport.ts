@@ -2,10 +2,12 @@ import { readLocalFile } from "../utils";
 import { logger } from "../log";
 import { createObjectCsvWriter } from "csv-writer";
 import { v4 as uuidv4 } from "uuid";
+import moment from "moment";
 
-export const cleanUpCSV = async (filePath: string) => {
+export const cleanUpCSV = async (filePath: string, lastCommit:string) => {
   return new Promise(async (resolve, reject) => {
     try {
+      console.log(lastCommit)
       const file: any = await readLocalFile(`../data/${filePath}`);
 
       const csv: string = String(file);
@@ -20,7 +22,7 @@ export const cleanUpCSV = async (filePath: string) => {
         .split(commaRegex)
         .map((h) => h.replace(quotesRegex, "$1").trim());
 
-      headers.push("uuid", "created_at", "updated_at");
+      headers.push("uuid", "created_at", "updated_at", "last_commit");
 
       const header = headers.map((line) => {
         return {
@@ -37,20 +39,24 @@ export const cleanUpCSV = async (filePath: string) => {
 
       for (let i = 0; i < newLines.length; i++) {
         const obj: any = {};
-        const currentline = newLines[i].split(commaRegex);
+        const currentLine = newLines[i].split(commaRegex);
 
         for (let j = 0; j < headers.length; j++) {
           if (headers[j].toLowerCase().trim() === "uuid") {
-            currentline[j] = uuidv4();
+            currentLine[j] = uuidv4();
           }
           if (headers[j].toLowerCase().trim() === "updated_at") {
-            currentline[j] = new Date().toISOString();
+            currentLine[j] = new Date().toISOString();
           }
           if (headers[j].toLowerCase().trim() === "created_at") {
-            currentline[j] = new Date().toISOString();
+            currentLine[j] = new Date().toISOString();
           }
-          if (currentline[j]) {
-            obj[headers[j].toLowerCase().trim()] = currentline[j]
+          if (headers[j].toLowerCase().trim() === "last_commit") {
+            currentLine[j] = moment(new Date(lastCommit)).utc().format();
+          }
+
+          if (currentLine[j]) {
+            obj[headers[j].toLowerCase().trim()] = currentLine[j]
               .replace(quotesRegex, "$1")
               .trim();
           }
@@ -60,7 +66,7 @@ export const cleanUpCSV = async (filePath: string) => {
           result.push(obj);
         }
       }
-      
+
       const fileWritten = writeToCsv(header, result);
 
       resolve(fileWritten);

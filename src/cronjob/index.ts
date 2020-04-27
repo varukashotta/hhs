@@ -52,7 +52,6 @@ const checkIfMatchingCSVExists = async (): Promise<any> => {
   });
 };
 
-// TODO: Make temp folder, store scv, process  , save to DB , create matching csv
 export const getFileFromServer = async () => {
   const { fileName } = result;
   const csvFileDate = moment(fileName).format("MM-DD-YYYY");
@@ -90,6 +89,7 @@ export const checkCSVDates = async () => {
   const { fileName } = result;
   return new Promise(async (resolve, reject) => {
     const files: string[] = await listCSVDirectory();
+    const {lastCommittedTime} = result;
 
     if (files[0].includes(fileName) && files.length > 1) {
       // Compare the csv files
@@ -99,7 +99,7 @@ export const checkCSVDates = async () => {
     } else {
       const file = files.filter((csvFile) => csvFile.includes(fileName));
 
-      await cleanUpCSV(file[0]);
+      await cleanUpCSV(file[0], lastCommittedTime);
 
       const finalProcess = await convertCSVtoTSVImportToDB();
 
@@ -197,13 +197,11 @@ export const writeTempCSVFile = async (data: any) => {
       if (!fs.existsSync(dir)) {
         fs.mkdirSync(dir);
       }
-
-      const tempFile = fs.writeFileSync(
-        `${__dirname}/../tmp/temp.csv`,
-        csv,
-        "utf8"
+      fs.writeFileSync(
+          `${__dirname}/../tmp/temp.csv`,
+          csv,
+          "utf8"
       );
-
       const updatingRecords = await startManualImport(lastUpdate);
 
       resolve(updatingRecords);
@@ -244,7 +242,7 @@ export const convertCSVtoTSVImportToDB = async () => {
 
       resolve(DBSaveResult);
     } catch (error) {
-      reject(new Error(error));
+      reject( new Error(error));
     }
   });
 };
