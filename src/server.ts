@@ -100,7 +100,7 @@ const app = new Koa().use(router.routes());
 
 
 // @ts-ignore
-server.applyMiddleware({app});
+server.applyMiddleware({app, path: "/wadeda"});
 
 // The `listen` method launches a web server.
 app.listen({ port: process.env.PORT || 4000 }, () => {
