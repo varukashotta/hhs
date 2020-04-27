@@ -8,7 +8,7 @@ import { readLocalFile } from "../utils";
 import { sendToDB } from "../csvProcessor/bulkImport";
 import { startManualImport } from "../csvProcessor/manualImport";
 
-const csvFolder = `${__dirname}/../data/`;
+const csvFolder = `../data/`;
 
 const COVID_CSV_REPO =
   "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/";
@@ -214,7 +214,7 @@ export const writeTempCSVFile = async (data: any) => {
 export const convertCSVtoTSVImportToDB = async () => {
   return new Promise(async (resolve, reject) => {
     try {
-      const file: any = readLocalFile(`${__dirname}/../data/dbImport.csv`);
+      const file: any = readLocalFile(`../data/dbImport.csv`);
 
       let array: string[];
 
