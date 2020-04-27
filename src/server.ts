@@ -11,7 +11,6 @@
 const EventEmitter = require("events");
 EventEmitter.defaultMaxListeners = 100;
 
-import { ApolloServer, gql } from "apollo-server";
 import YoutubeAPI from "./datasources/youtube";
 import dotenv from "dotenv";
 import RedditAPI from "./datasources/reddit";
@@ -19,6 +18,9 @@ import NewsAPI from "./datasources/news";
 import TwitterAPI from "./datasources/twitter";
 import unleashDragon from "./cronjob";
 import { logger } from "./log";
+import Koa from 'koa';
+import { ApolloServer, gql } from 'apollo-server-koa';
+import Router from 'koa-router';
 
 dotenv.config();
 
@@ -83,7 +85,24 @@ const server = new ApolloServer({
   }),
 });
 
-// The `listen` method launches a web server.
-server.listen({ port: process.env.PORT || 4000 }).then((url: any) => {
-  logger.info(`🚀  Server ready at ${url.url}`);
+const router = new Router();
+
+router.get('/auth', (ctx) => {
+  // console.log(ctx);
+
+  ctx.body = {
+    'X-Hasura-Role': 'user',
+  };
+  // ctx.router available
 });
+
+const app = new Koa().use(router.routes());
+
+
+// @ts-ignore
+server.applyMiddleware({app});
+
+// The `listen` method launches a web server.
+app.listen({ port: process.env.PORT || 4000 }, () => {
+  logger.info(`🚀  Server ready`);
+})
