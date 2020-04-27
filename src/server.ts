@@ -105,4 +105,4 @@ server.applyMiddleware({app});
 // The `listen` method launches a web server.
 app.listen({ port: process.env.PORT || 4000 }, () => {
   logger.info(`🚀  Server ready`);
-})
+});
