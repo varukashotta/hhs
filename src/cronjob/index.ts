@@ -127,10 +127,13 @@ export const compareCSVFiles = async () => {
   return new Promise(async (resolve, reject) => {
     const { lastCommittedTime } = result;
     try {
-      const files = await listCSVDirectory();
+      console.log('compareCSVFiles');
+      let files = await listCSVDirectory();
 
       let existingCSV: string = "";
       let latestCSV: string = "";
+
+      files = files.filter(e => e.includes('csv'));
 
       files.map((file) => {
         if (file.includes(lastCommittedTime)) {
