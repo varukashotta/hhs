@@ -89,28 +89,31 @@ export const writeToFile = async (data: any) => {
 };
 
 export const checkCSVDates = async () => {
-  const { fileName } = result;
   return new Promise(async (resolve, reject) => {
-    const files: string[] = await listCSVDirectory();
-    const {lastCommittedTime} = result;
+    try{
+      const files: string[] = await listCSVDirectory();
+      const {lastCommittedTime, fileName} = result;
 
-    if (files[0].includes(fileName) && files.length > 1) {
-      // Compare the csv files
-      const comparison = await compareCSVFiles();
+      if (files[0].includes(fileName) && files.length > 1) {
+        // Compare the csv files
+        const comparison = await compareCSVFiles();
 
-      resolve(comparison);
-    } else {
-      const file = files.filter((csvFile) => csvFile.includes(fileName));
+        resolve(comparison);
+      } else {
+        const file = files.filter((csvFile) => csvFile.includes(fileName));
 
-      console.log('startbulk');
+        console.log('checkCSVDates');
 
 
-      await cleanUpCSV(file[0], lastCommittedTime);
+        await cleanUpCSV(file[0], lastCommittedTime);
 
-      const finalProcess = await convertCSVtoTSVImportToDB();
+        const finalProcess = await convertCSVtoTSVImportToDB();
 
-      // Create new records and delete existing file
-      resolve(finalProcess);
+        // Create new records and delete existing file
+        resolve(finalProcess);
+      }
+    }catch (e) {
+      reject(new Error(e))
     }
   });
 };
