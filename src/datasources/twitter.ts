@@ -17,8 +17,6 @@ class TwitterAPI extends RESTDataSource {
   dataReducer(post: any) {
     const { id_str, user, text, created_at } = post;
 
-    // console.log(post);
-
     return {
       id:id_str,
       publishedAt: created_at,
