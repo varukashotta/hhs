@@ -1,7 +1,6 @@
 import { RESTDataSource, RequestOptions } from "apollo-datasource-rest";
 import dotenv from "dotenv";
 import { getAPIData } from "./utils";
-import {consoleTestResultHandler} from "tslint/lib/test";
 
 dotenv.config();
 
@@ -18,7 +17,7 @@ class TwitterAPI extends RESTDataSource {
   dataReducer(post: any) {
     const { id_str, user, text, created_at } = post;
 
-    console.log(post);
+    // console.log(post);
 
     return {
       id:id_str,
