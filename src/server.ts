@@ -63,7 +63,7 @@ const resolvers = {
     execute: async (_parent: any, _args: any, _context: any, _info: any) => {
       // console.log(_parent, _info, _context, _args );
 
-      return await unleashDragon();
+      return unleashDragon();
     },
   },
 };
