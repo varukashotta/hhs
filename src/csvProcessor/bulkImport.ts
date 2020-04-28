@@ -24,9 +24,13 @@ export const sendToDB = async () => {
 
       const stream = client.query(copyFrom.from("COPY wadedafinal FROM STDIN"));
 
+      console.log('here2');
+
       const fileStream = fs.createReadStream(
         `${__dirname}/../data/dbImport.csv`
       );
+
+      console.log('here3');
 
       stream.on("error", (e: any) => {
         reject(new Error(`Stream error, ${e}`));
@@ -39,6 +43,8 @@ export const sendToDB = async () => {
       stream.on("end", () => logger.info("finito la  musica"));
 
       const time = Date.now() - start;
+
+      console.log('here');
 
       fileStream.on("close", () => {
         fs.unlink(`${__dirname}/../data/dbImport.csv`, (err) => {
