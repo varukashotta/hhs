@@ -15,14 +15,16 @@ class NewsAPI extends RESTDataSource {
   }
 
   dataReducer(post: any) {
-    const { source, title, url, publishedAt, urlToImage } = post;
+    const { source, author, title, url, publishedAt, urlToImage } = post;
+
+    console.log(post);
 
     return {
       id: uuidv4(),
       publishedAt,
       title,
       link: url,
-      author: source.name,
+      author: source.name || author,
       thumbnail: urlToImage
     };
   }
