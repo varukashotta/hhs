@@ -181,6 +181,7 @@ export const createCSVUpdateFile = async ({
       resolve(tempFileWritten);
     } catch (error) {
       reject(new Error(error));
+
     }
   });
 };
