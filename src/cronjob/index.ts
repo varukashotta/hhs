@@ -36,6 +36,7 @@ const checkIfMatchingCSVExists = async (): Promise<any> => {
   const { lastCommittedTime } = result;
   return new Promise(async (resolve, reject) => {
     try {
+      console.log('checkIfMatchingCSVExists');
       const filesStored: any = await listCSVDirectory();
       const fileFound =
         filesStored &&
@@ -255,6 +256,7 @@ const unleashDragon = async () => {
       const { lastCommittedTime } = result;
       if (lastCommittedTime) {
         const files = await checkIfMatchingCSVExists();
+        console.log('start - unleash')
         resolve(files);
       } else {
         reject(new Error("Error retrieving data from github!"));
