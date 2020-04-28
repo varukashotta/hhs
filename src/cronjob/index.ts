@@ -135,6 +135,8 @@ export const compareCSVFiles = async () => {
 
       files = files.filter(e => e.includes('csv'));
 
+      console.log(files);
+
       files.map((file) => {
         if (file.includes(lastCommittedTime)) {
           latestCSV = file;
