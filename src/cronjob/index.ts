@@ -93,6 +93,7 @@ export const checkCSVDates = async () => {
     try{
       const files: string[] = await listCSVDirectory();
       const {lastCommittedTime, fileName} = result;
+      console.log('checkCSVDates');
 
       if (files[0].includes(fileName) && files.length > 1) {
         // Compare the csv files
@@ -102,7 +103,6 @@ export const checkCSVDates = async () => {
       } else {
         const file = files.filter((csvFile) => csvFile.includes(fileName));
 
-        console.log('checkCSVDates');
 
 
         await cleanUpCSV(file[0], lastCommittedTime);
