@@ -59,6 +59,7 @@ export const getFileFromServer = async () => {
   return new Promise(async (resolve, reject) => {
     let resp: any;
     try {
+      console.log('getFileFromServer');
       resp = await axios.get(`${COVID_CSV_REPO + csvFileDate}.csv`);
       const saveFile = await writeToFile(resp);
       resolve(saveFile);
@@ -77,6 +78,7 @@ export const writeToFile = async (data: any) => {
         `${csvFolder}${fileName}-${lastCommittedTime}.csv`,
         String(data.data)
       );
+      console.log('writeToFile');
 
       const comparedCSV = await checkCSVDates();
       resolve(comparedCSV);
@@ -99,6 +101,9 @@ export const checkCSVDates = async () => {
       resolve(comparison);
     } else {
       const file = files.filter((csvFile) => csvFile.includes(fileName));
+
+      console.log('startbulk');
+
 
       await cleanUpCSV(file[0], lastCommittedTime);
 
@@ -216,7 +221,13 @@ export const writeTempCSVFile = async (data: any) => {
 export const convertCSVtoTSVImportToDB = async () => {
   return new Promise(async (resolve, reject) => {
     try {
+
+      console.log('convertCSVtoTSVImportToDB');
+
       const file: any = readLocalFile(`../data/dbImport.csv`);
+
+      console.log('readLocalFile');
+
 
       let array: string[];
 
