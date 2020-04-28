@@ -98,7 +98,6 @@ router.get('/auth', (ctx) => {
 
 const app = new Koa().use(router.routes());
 
-
 // @ts-ignore
 server.applyMiddleware({app, path: "/wadeda"});
 
