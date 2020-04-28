@@ -97,7 +97,7 @@ export const checkCSVDates = async () => {
 
       if (files[0].includes(fileName) && files.length > 2) {
 
-        console.log('compare');
+        console.log('compare', fileName, files);
 
         // Compare the csv files
         const comparison = await compareCSVFiles();
