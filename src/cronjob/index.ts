@@ -108,8 +108,6 @@ export const checkCSVDates = async () => {
 
         const file = files.filter((csvFile) => csvFile.includes(fileName));
 
-
-
         await cleanUpCSV(file[0], lastCommittedTime);
 
         const finalProcess = await convertCSVtoTSVImportToDB();

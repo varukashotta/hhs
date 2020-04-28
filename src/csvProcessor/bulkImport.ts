@@ -13,6 +13,8 @@ const connectionString = `${process.env.DB_URL}`;
 export const sendToDB = async () => {
   return new Promise(async (resolve, reject) => {
     try {
+      console.log('sendToBD');
+
       const start = Date.now();
 
       const client = new Client({
