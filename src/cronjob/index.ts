@@ -96,11 +96,16 @@ export const checkCSVDates = async () => {
       console.log('checkCSVDates');
 
       if (files[0].includes(fileName) && files.length > 1) {
+
+        console.log('compare');
+
         // Compare the csv files
         const comparison = await compareCSVFiles();
 
         resolve(comparison);
       } else {
+        console.log('bulk compare');
+
         const file = files.filter((csvFile) => csvFile.includes(fileName));
 
 
