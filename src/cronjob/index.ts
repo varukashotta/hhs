@@ -95,7 +95,7 @@ export const checkCSVDates = async () => {
       const {lastCommittedTime, fileName} = result;
       console.log('checkCSVDates');
 
-      if (files[0].includes(fileName) && files.length > 1) {
+      if (files[0].includes(fileName) && files.length > 2) {
 
         console.log('compare');
 
