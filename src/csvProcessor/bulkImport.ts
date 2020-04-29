@@ -13,7 +13,7 @@ const connectionString = `${process.env.DB_URL}`;
 export const sendToDB = async () => {
   return new Promise(async (resolve, reject) => {
     try {
-      console.log('sendToBD');
+      console.log("sendToBD");
 
       const start = Date.now();
 
@@ -24,15 +24,24 @@ export const sendToDB = async () => {
 
       await client.connect();
 
+      try {
+        let truncateResult = await client.query(
+          "TRUNCATE table wadedafinal RESTART IDENTITY"
+        );
+        console.log(truncateResult);
+      } catch (e) {
+        console.log(e);
+      }
+
       const stream = client.query(copyFrom.from("COPY wadedafinal FROM STDIN"));
 
-      console.log('here2');
+      console.log("here2");
 
       const fileStream = fs.createReadStream(
         `${__dirname}/../data/dbImport.csv`
       );
 
-      console.log('here3');
+      console.log("here3");
 
       stream.on("error", (e: any) => {
         reject(new Error(`Stream error, ${e}`));
@@ -46,7 +55,7 @@ export const sendToDB = async () => {
 
       const time = Date.now() - start;
 
-      console.log('here');
+      console.log("here");
 
       fileStream.on("close", () => {
         fs.unlink(`${__dirname}/../data/dbImport.csv`, (err) => {
@@ -63,7 +72,6 @@ export const sendToDB = async () => {
     }
   });
 };
-
 
 // CREATE TABLE public.wadedafinal (
 //   fips character varying(50)  NULL,
