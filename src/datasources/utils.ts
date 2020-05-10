@@ -55,7 +55,7 @@ export const getFromSource = async ({
     try {
       const data = urlDataArray.map((items: any) => api.dataReducer(items));
 
-      const result = await saveData(apiName, JSON.stringify(data), 600);
+      const result = await saveData(apiName, JSON.stringify(data), 60);
 
       logger.info({ message: result });
 

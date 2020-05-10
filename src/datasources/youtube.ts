@@ -7,7 +7,7 @@ dotenv.config();
 class YoutubeAPI extends RESTDataSource {
   constructor() {
     super();
-    this.baseURL = `https://www.googleapis.com/youtube/v3/search?part=snippet&key=${process.env.YOUTUBE_API}&maxResults=25&q=covid-19`;
+    this.baseURL = `https://www.googleapis.com/youtube/v3/search?part=snippet&key=${process.env.YOUTUBE_API}&maxResults=25&q=coronavirus&lr=en`;
   }
 
   dataReducer(video: any) {
@@ -25,7 +25,7 @@ class YoutubeAPI extends RESTDataSource {
       title,
       description,
       thumbnail: thumbnails.high.url,
-      channelTitle,
+      author: channelTitle,
     };
   }
 
