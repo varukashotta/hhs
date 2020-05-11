@@ -19,6 +19,8 @@ class YoutubeAPI extends RESTDataSource {
       channelTitle,
     } = video.snippet;
 
+    console.log(video);
+
     return {
       id: video.id.videoId || 0,
       publishedAt,

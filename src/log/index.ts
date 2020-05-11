@@ -1,9 +1,9 @@
 import winston, { format } from "winston";
 import { Loggly } from "winston-loggly-bulk";
 import dotenv from "dotenv";
-import { ElasticSearchClient } from "../search/elasticsearch";
-import { ElasticsearchTransport } from "winston-elasticsearch";
-const client = ElasticSearchClient();
+// import { ElasticSearchClient } from "../search/elasticsearch";
+// import { ElasticsearchTransport } from "winston-elasticsearch";
+// const client = ElasticSearchClient();
 
 // dotenv.config();
 // let  apm = require("elastic-apm-node").start({
@@ -52,19 +52,19 @@ export const logger = winston.createLogger({
       filename: "./src/log/mail.log",
       level: "mail",
     }),
-    new ElasticsearchTransport({
-      level: "info",
-      clientOpts: {
-        node: `${process.env.ELASTIC_SEARCH_SERVER_URL}`,
-        auth: {
-          apiKey: {
-            api_key: `${process.env.ELASTIC_SEARCH_SERVER_API_KEY}`,
-            id: `${process.env.ELASTIC_SEARCH_SERVER_API_ID}`,
-          },
-        },
-      },
-      index: "human-hope-server-logs",
-    }),
+    // new ElasticsearchTransport({
+    //   level: "info",
+    //   clientOpts: {
+    //     node: `${process.env.ELASTIC_SEARCH_SERVER_URL}`,
+    //     auth: {
+    //       apiKey: {
+    //         api_key: `${process.env.ELASTIC_SEARCH_SERVER_API_KEY}`,
+    //         id: `${process.env.ELASTIC_SEARCH_SERVER_API_ID}`,
+    //       },
+    //     },
+    //   },
+    //   index: "human-hope-server-logs",
+    // }),
     new winston.transports.File({
       filename: "./src/log/error.log",
       level: "error",

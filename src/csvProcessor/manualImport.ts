@@ -1,7 +1,7 @@
 import { csvToJson, readLocalFile } from "../utils";
 import graphqlClient from "../utils/GraphQLRequest";
 import moment from "moment";
-import { searchDoc } from "../search/elasticsearch";
+// import { searchDoc } from "../search/elasticsearch";
 
 const saveRow = `
   mutation MyMutation($combinedKey: String!, $lastCommitted: String!, $lastUpdated: timestamp!, $active: Int!, $deaths: Int!, $confirmed: Int!, $recovered: Int!) {
@@ -152,13 +152,13 @@ export const updateItemInSearch = async (addedRowResult: any) => {
           combined_key,
         } = addedRowResult.insert_recorded.returning[0];
 
-        const updatedRecord = await searchDoc(
-          last_updated,
-          combined_key,
-          addedRowResult.insert_recorded.returning[0]
-        );
-
-        console.log({ updatedRecord });
+        // const updatedRecord = await searchDoc(
+        //   last_updated,
+        //   combined_key,
+        //   addedRowResult.insert_recorded.returning[0]
+        // );
+        //
+        // console.log({ updatedRecord });
         resolve(`Added ${combined_key} record to search queue!`);
       } catch (error) {
         reject(new Error(error));
