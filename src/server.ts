@@ -8,19 +8,20 @@
 // });
 
 // tslint:disable-next-line: no-var-requires
-const EventEmitter = require("events");
-EventEmitter.defaultMaxListeners = 100;
-
+import GlobalAPI from "./datasources/global";
 import YoutubeAPI from "./datasources/youtube";
 import dotenv from "dotenv";
 import RedditAPI from "./datasources/reddit";
 import NewsAPI from "./datasources/news";
 import TwitterAPI from "./datasources/twitter";
 import unleashDragon from "./cronjob";
-import { logger } from "./log";
+import {logger} from "./log";
 import Koa from 'koa';
-import { ApolloServer, gql } from 'apollo-server-koa';
+import {ApolloServer, gql} from 'apollo-server-koa';
 import Router from 'koa-router';
+
+const EventEmitter = require("events");
+EventEmitter.defaultMaxListeners = 100;
 
 dotenv.config();
 
@@ -36,6 +37,11 @@ const typeDefs = gql`
     thumbnail: String
     description: String
   }
+  
+  type Global {
+    newDeaths: Int!
+    newConfirmed: Int!
+  }
 
   type Query {
     youtube: [Info]
@@ -43,57 +49,62 @@ const typeDefs = gql`
     news: [Info]
     twitter: [Info]
     execute: String!
+    global: Global
   }
 `;
 
 const resolvers = {
-  Query: {
-    youtube: async (_source: any, { id }: any, { dataSources }: any) => {
-      return dataSources.youtubeAPI.getVideos();
-    },
-    reddit: async (_source: any, { id }: any, { dataSources }: any) => {
-      return dataSources.redditAPI.getRedits();
-    },
-    news: async (_source: any, { id }: any, { dataSources }: any) => {
-      return dataSources.newsAPI.getNews();
-    },
-    twitter: async (_source: any, { id }: any, { dataSources }: any) => {
-      return dataSources.twitterAPI.getTweets();
-    },
-    execute: async (_parent: any, _args: any, _context: any, _info: any) => {
-      // console.log(_parent, _info, _context, _args );
+    Query: {
+        youtube: async (_source: any, {id}: any, {dataSources}: any) => {
+            return dataSources.youtubeAPI.getVideos();
+        },
+        reddit: async (_source: any, {id}: any, {dataSources}: any) => {
+            return dataSources.redditAPI.getRedits();
+        },
+        news: async (_source: any, {id}: any, {dataSources}: any) => {
+            return dataSources.newsAPI.getNews();
+        },
+        twitter: async (_source: any, {id}: any, {dataSources}: any) => {
+            return dataSources.twitterAPI.getTweets();
+        },
+        execute: async (_parent: any, _args: any, _context: any, _info: any) => {
+            // console.log(_parent, _info, _context, _args );
 
-      return unleashDragon();
+            return unleashDragon();
+        },
+        global: async (_source: any, {id}: any, {dataSources}: any) => {
+            return dataSources.globalAPI.getGlobal();
+        }
     },
-  },
 };
 
 // The ApolloServer constructor requires two parameters: your schema
 // definition and your set of resolvers.
 const server = new ApolloServer({
-  typeDefs,
-  resolvers,
-  tracing: true,
-  introspection: true,
-  debug: true,
-  playground: true,
-  dataSources: () => ({
-    youtubeAPI: new YoutubeAPI(),
-    redditAPI: new RedditAPI(),
-    newsAPI: new NewsAPI(),
-    twitterAPI: new TwitterAPI(),
-  }),
+    typeDefs,
+    resolvers,
+    tracing: true,
+    introspection: true,
+    debug: true,
+    playground: true,
+    dataSources: () => ({
+        youtubeAPI: new YoutubeAPI(),
+        redditAPI: new RedditAPI(),
+        newsAPI: new NewsAPI(),
+        twitterAPI: new TwitterAPI(),
+        globalAPI: new GlobalAPI()
+    }),
 });
 
 const router = new Router();
 
 router.get('/auth', (ctx) => {
-   console.log(ctx);
+    console.log(ctx);
 
-  ctx.body = {
-    'X-Hasura-Role': 'user',
-  };
-  // ctx.router available
+    ctx.body = {
+        'X-Hasura-Role': 'user',
+    };
+    // ctx.router available
 });
 
 const app = new Koa().use(router.routes());
@@ -102,6 +113,6 @@ const app = new Koa().use(router.routes());
 server.applyMiddleware({app, path: "/wadeda"});
 
 // The `listen` method launches a web server.
-app.listen({ port: process.env.PORT || 4000 }, () => {
-  logger.info(`🚀  Server ready`);
+app.listen({port: process.env.PORT || 4000}, () => {
+    logger.info(`🚀  Server ready`);
 });

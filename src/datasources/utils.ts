@@ -5,7 +5,8 @@ enum Response {
   twitter = "tweets",
   youtube = "videos",
   news = "news",
-  redits = "post"
+  redits = "post",
+  global = "global"
 }
 
 
