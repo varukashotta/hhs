@@ -27,6 +27,7 @@ export const getAPIData = async (
         apiName,
       });
   } catch (e) {
+    console.log(e);
     throw new Error("Error fetching data, please try reloading the page.");
   }
 };
