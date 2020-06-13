@@ -1,9 +1,10 @@
-import pg, { Pool, Client } from "pg";
+import pg, {Pool, Client} from "pg";
 import copyFrom from "pg-copy-streams";
 import fs from "fs";
 import dotenv from "dotenv";
-import { millisecondsToMinutesAndSeconds } from "../datasources/utils";
-import { logger } from "../log/index";
+import {millisecondsToMinutesAndSeconds} from "../datasources/utils";
+import {logger} from "../log/index";
+
 pg.defaults.ssl = true;
 
 dotenv.config();
@@ -11,66 +12,79 @@ dotenv.config();
 const connectionString = `${process.env.DB_URL}`;
 
 export const sendToDB = async () => {
-  return new Promise(async (resolve, reject) => {
-    try {
-      console.log("sendToBD");
+    return new Promise(async (resolve, reject) => {
+        try {
+            console.log("sendToBD");
 
-      const start = Date.now();
+            const start = Date.now();
 
-      const client = new Client({
-        connectionString,
-        ssl: { rejectUnauthorized: false },
-      });
+            const pool = new pg.Pool({
+                connectionString,
+                ssl: {rejectUnauthorized: false},
+            });
 
-      await client.connect();
+            try {
 
-      try {
-        let truncateResult = await client.query(
-          "TRUNCATE table wadedafinal RESTART IDENTITY"
-        );
-        console.log(truncateResult);
-      } catch (e) {
-        console.log(e);
-      }
+                pool.connect((err, client, done) => {
 
-      const stream = client.query(copyFrom.from("COPY wadedafinal FROM STDIN"));
+                    let truncateResult = client.query(
+                        "TRUNCATE table wadedafinal RESTART IDENTITY"
+                    );
+                    client.release();
 
-      console.log("here2");
+                    console.log(truncateResult);
+                })
+            } catch (e) {
+                console.log(e);
+            }
 
-      const fileStream = fs.createReadStream(
-        `${__dirname}/../data/dbImport.csv`
-      );
+            pool.connect((err, client, done) => {
 
-      console.log("here3");
+                const stream = client.query(copyFrom.from("COPY wadedafinal FROM STDIN"));
 
-      stream.on("error", (e: any) => {
-        reject(new Error(`Stream error, ${e}`));
-      });
+                console.log("here2");
 
-      fileStream.on("error", (e) => {
-        reject(new Error(`File stream - Stream error, ${e}`));
-      });
+                const fileStream = fs.createReadStream(
+                    `${__dirname}/../data/dbImport.csv`
+                );
 
-      stream.on("end", () => logger.info("finito la  musica"));
+                console.log("here3");
 
-      const time = Date.now() - start;
+                stream.on("error", (e: any) => {
+                    console.log(e);
+                    reject(new Error(`Stream error, ${e}`));
+                });
 
-      console.log("here");
+                fileStream.on("error", (e) => {
+                    console.log(e);
+                    reject(new Error(`File stream - Stream error, ${e}`));
+                });
 
-      fileStream.on("close", () => {
-        fs.unlink(`${__dirname}/../data/dbImport.csv`, (err) => {
-          if (err) console.log(err);
-          logger.info("successfully deleted");
-        });
+                stream.on("end", () => logger.info("finito la  musica"));
 
-        resolve(`pasala la fest ${millisecondsToMinutesAndSeconds(time)}`);
-      });
+                const time = Date.now() - start;
 
-      fileStream.pipe(stream);
-    } catch (e) {
-      reject(e);
-    }
-  });
+                console.log("here");
+
+                fileStream.pipe(stream);
+
+                resolve(`pasala la fest ${millisecondsToMinutesAndSeconds(time)}`);
+
+
+                fileStream.on("close", () => {
+                    fs.unlink(`${__dirname}/../data/dbImport.csv`, (err) => {
+                        if (err) console.log(err);
+                        logger.info("successfully deleted");
+                    });
+
+                });
+
+            })
+
+        } catch (e) {
+            reject(e);
+        }
+    });
 };
 
 // CREATE TABLE public.wadedafinal (
@@ -86,7 +100,31 @@ export const sendToDB = async () => {
 //   recovered integer  NULL,
 //   active integer  NULL,
 //   combined_key text  NULL,
+//   incidence_rate text  NULL,
+//   case_fatality_ratio text  NULL,
 //   uuid text  NOT NULL,
 //   created_at timestamp with time zone  NULL,
-//   updated_at timestamp with time zone  NULL
+//   updated_at timestamp with time zone  NULL,
+//     last_commit timestamp with time zone  NULL
 // );
+//
+// CREATE OR REPLACE VIEW "public"."country_total_numbers" AS
+// SELECT DISTINCT wadedafinal.last_commit,
+//     wadedafinal.country_region,
+//     sum(wadedafinal.active) AS active,
+//     sum(wadedafinal.deaths) AS deaths,
+//     sum(wadedafinal.recovered) AS recovered,
+//     sum(wadedafinal.confirmed) AS confirmed,
+//     min((wadedafinal.lat)::text) AS latitude,
+//     min((wadedafinal.long_)::text) AS longitude
+// FROM wadedafinal
+// GROUP BY wadedafinal.country_region, wadedafinal.last_commit;
+//
+// CREATE OR REPLACE VIEW "public"."world_total_numbers" AS
+// SELECT DISTINCT wadedafinal.last_commit,
+//     sum(wadedafinal.active) AS active,
+//     sum(wadedafinal.deaths) AS deaths,
+//     sum(wadedafinal.recovered) AS recovered,
+//     sum(wadedafinal.confirmed) AS confirmed
+// FROM wadedafinal
+// GROUP BY wadedafinal.last_commit;

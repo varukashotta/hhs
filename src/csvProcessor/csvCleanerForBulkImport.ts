@@ -10,9 +10,19 @@ export const cleanUpCSV = async (filePath: string, lastCommit:string) => {
       console.log(lastCommit)
       const file: any = await readLocalFile(`../data/${filePath}`);
 
-      const csv: string = String(file);
+      let csv: string = String(file);
+
+      // csv = csv.split('\n').map(function(line) {
+      //   var columns = line.split(','); // get the columns
+      //   columns.splice(12, 2); // remove total column
+      //   return columns;
+      // }).join('\n');
+      //
+      //  console.log(csv);
 
       const lines = csv.split("\n");
+
+      console.log(lines);
 
       const commaRegex = /,(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)/g;
 
