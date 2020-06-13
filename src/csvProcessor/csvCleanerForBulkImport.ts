@@ -22,8 +22,6 @@ export const cleanUpCSV = async (filePath: string, lastCommit:string) => {
 
       const lines = csv.split("\n");
 
-      console.log(lines);
-
       const commaRegex = /,(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)/g;
 
       const quotesRegex = /^"(.*)"$/g;

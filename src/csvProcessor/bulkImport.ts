@@ -52,23 +52,21 @@ export const sendToDB = async () => {
 
                 stream.on("error", (e: any) => {
                     console.log(e);
+                    client.release();
                     reject(new Error(`Stream error, ${e}`));
                 });
 
                 fileStream.on("error", (e) => {
                     console.log(e);
+                    client.release();
                     reject(new Error(`File stream - Stream error, ${e}`));
                 });
 
-                stream.on("end", () => logger.info("finito la  musica"));
 
                 const time = Date.now() - start;
 
                 console.log("here");
 
-                fileStream.pipe(stream);
-
-                resolve(`pasala la fest ${millisecondsToMinutesAndSeconds(time)}`);
 
 
                 fileStream.on("close", () => {
@@ -76,8 +74,19 @@ export const sendToDB = async () => {
                         if (err) console.log(err);
                         logger.info("successfully deleted");
                     });
-
                 });
+
+                stream.on("end", () => {
+                    client.release();
+                    logger.info("finito la  musica");
+                });
+
+
+                fileStream.pipe(stream);
+
+
+                resolve(`pasala la fest ${millisecondsToMinutesAndSeconds(time)}`);
+
 
             })
 
