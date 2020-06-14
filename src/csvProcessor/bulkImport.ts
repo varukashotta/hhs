@@ -24,22 +24,22 @@ export const sendToDB = async () => {
                 ssl: {rejectUnauthorized: false},
             });
 
-            try {
 
-                pool.connect((err, client, done) => {
+                // pool.connect((err, client, done) => {
+                //
+                //     let truncateResult = client.query(
+                //         "TRUNCATE table wadedafinal RESTART IDENTITY"
+                //     );
+                //     client.release();
+                //
+                //     console.log(truncateResult);
+                // })
 
-                    let truncateResult = client.query(
-                        "TRUNCATE table wadedafinal RESTART IDENTITY"
-                    );
-                    client.release();
-
-                    console.log(truncateResult);
-                })
-            } catch (e) {
-                console.log(e);
-            }
 
             pool.connect((err, client, done) => {
+                client.query(
+                    "TRUNCATE table wadedafinal RESTART IDENTITY"
+                );
 
                 const stream = client.query(copyFrom.from("COPY wadedafinal FROM STDIN"));
 
