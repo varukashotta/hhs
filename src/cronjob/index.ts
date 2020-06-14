@@ -21,7 +21,7 @@ let result: IProps;
 
 let lastUpdate: any;
 
-const listCSVDirectory = (): Promise<string[]> => {
+export const listCSVDirectory = (): Promise<string[]> => {
   return new Promise(async (resolve, reject) => {
     try {
       const files: string[] = fs.readdirSync(csvFolder);

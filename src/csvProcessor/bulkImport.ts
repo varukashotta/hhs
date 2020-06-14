@@ -4,6 +4,7 @@ import fs from "fs";
 import dotenv from "dotenv";
 import {millisecondsToMinutesAndSeconds} from "../datasources/utils";
 import {logger} from "../log/index";
+import {listCSVDirectory} from "../cronjob";
 
 pg.defaults.ssl = true;
 
@@ -69,11 +70,21 @@ export const sendToDB = async () => {
 
 
 
-                fileStream.on("close", () => {
+                fileStream.on("close", async() => {
                     fs.unlink(`${__dirname}/../data/dbImport.csv`, (err) => {
                         if (err) console.log(err);
                         logger.info("successfully deleted");
                     });
+                    const filesStored: any = await listCSVDirectory();
+                    const fileFound =
+                        filesStored &&
+                        filesStored.filter((file: any) => file.includes('.csv'));
+                    if (fileFound && fileFound.length > 0) {
+                        fs.unlink(`${__dirname}/../data/${fileFound}`, (err) => {
+                            if (err) console.log(err);
+                            logger.info("successfully deleted");
+                        });
+                    }
                 });
 
                 stream.on("end", () => {
