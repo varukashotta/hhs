@@ -63,6 +63,12 @@ export const cleanUpCSV = async (filePath: string, lastCommit:string) => {
             currentLine[j] = moment(new Date(lastCommit)).utc().format();
           }
 
+          if (headers[j].toLowerCase().trim() === "active") {
+            if (currentLine[j] === ""){
+              currentLine[j] = "0";
+            }
+          }
+
           if (currentLine[j]) {
             obj[headers[j].toLowerCase().trim()] = currentLine[j]
               .replace(quotesRegex, "$1")
